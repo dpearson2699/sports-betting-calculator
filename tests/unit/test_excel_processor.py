@@ -1,17 +1,13 @@
-"""Unit tests for excel_processor.py"""
+"""Unit tests for src.excel_processor.py"""
 
 import pytest
 import pandas as pd
-import sys
 import tempfile
 import os
 from pathlib import Path
 from unittest.mock import Mock, patch, MagicMock
 
-# Add src to path for imports
-sys.path.append(str(Path(__file__).parent.parent.parent / "src"))
-
-from excel_processor import (
+from src.excel_processor import (
     get_required_input_columns,
     apply_excel_formatting,
     adjust_column_widths,
@@ -99,7 +95,7 @@ class TestExcelFormatting:
 class TestFileOperations:
     """Test file operation utilities"""
     
-    @patch('excel_processor.INPUT_DIR')
+    @patch('src.excel_processor.INPUT_DIR')
     def test_list_available_input_files(self, mock_input_dir):
         """Test listing available Excel files"""
         # Create mock file objects with name attribute
@@ -119,7 +115,7 @@ class TestFileOperations:
         assert 'test2.xlsx' in files
         assert '~temp.xlsx' not in files
     
-    @patch('excel_processor.INPUT_DIR')
+    @patch('src.excel_processor.INPUT_DIR')
     def test_get_input_file_path(self, mock_input_dir):
         """Test getting input file path"""
         filename = 'test.xlsx'
@@ -127,8 +123,8 @@ class TestFileOperations:
         
         mock_input_dir.__truediv__.assert_called_once_with(filename)
     
-    @patch('excel_processor.INPUT_DIR')
-    @patch('excel_processor.pd.DataFrame.to_excel')
+    @patch('src.excel_processor.INPUT_DIR')
+    @patch('src.excel_processor.pd.DataFrame.to_excel')
     def test_create_sample_excel_in_input_dir(self, mock_to_excel, mock_input_dir):
         """Test sample Excel file creation"""
         mock_input_dir.__truediv__.return_value = Path('test_path.xlsx')
@@ -240,7 +236,7 @@ class TestProcessBettingExcel:
     
     def test_process_betting_excel_with_valid_data(self, temp_excel_file, sample_bankroll):
         """Test processing valid Excel file"""
-        with patch('excel_processor.user_input_betting_framework') as mock_framework:
+        with patch('src.excel_processor.user_input_betting_framework') as mock_framework:
             # Mock framework responses with proper data types
             mock_framework.return_value = {
                 'decision': 'BET',
@@ -255,7 +251,7 @@ class TestProcessBettingExcel:
             }
             
             # Don't mock the Excel writer, let it fail gracefully or use real temp file
-            with patch('excel_processor.OUTPUT_DIR') as mock_output_dir:
+            with patch('src.excel_processor.OUTPUT_DIR') as mock_output_dir:
                 mock_output_dir.__truediv__ = Mock(return_value=Path('/tmp/test_output.xlsx'))
                 
                 # Mock only the actual file writing operations that would fail
@@ -294,7 +290,7 @@ class TestProcessBettingExcel:
             temp_file = tmp.name
         
         try:
-            with patch('excel_processor.user_input_betting_framework') as mock_framework:
+            with patch('src.excel_processor.user_input_betting_framework') as mock_framework:
                 mock_framework.return_value = {
                     'decision': 'BET',
                     'ev_percentage': 15.0,
@@ -307,7 +303,7 @@ class TestProcessBettingExcel:
                     'unused_amount': 3.0
                 }
                 
-                with patch('excel_processor.pd.ExcelWriter') as mock_writer:
+                with patch('src.excel_processor.pd.ExcelWriter') as mock_writer:
                     mock_writer_instance = Mock()
                     mock_writer_instance.__enter__ = Mock(return_value=mock_writer_instance)
                     mock_writer_instance.__exit__ = Mock(return_value=None)
@@ -341,7 +337,7 @@ class TestProcessBettingExcel:
             temp_file = tmp.name
         
         try:
-            with patch('excel_processor.user_input_betting_framework') as mock_framework:
+            with patch('src.excel_processor.user_input_betting_framework') as mock_framework:
                 mock_framework.return_value = {
                     'decision': 'BET',
                     'ev_percentage': 15.0,
@@ -354,7 +350,7 @@ class TestProcessBettingExcel:
                     'unused_amount': 3.0
                 }
                 
-                with patch('excel_processor.pd.ExcelWriter') as mock_writer:
+                with patch('src.excel_processor.pd.ExcelWriter') as mock_writer:
                     mock_writer_instance = Mock()
                     mock_writer_instance.__enter__ = Mock(return_value=mock_writer_instance)
                     mock_writer_instance.__exit__ = Mock(return_value=None)
@@ -418,7 +414,7 @@ class TestIntegrationScenarios:
         
         try:
             # Mock only the file output operations
-            with patch('excel_processor.OUTPUT_DIR') as mock_output_dir:
+            with patch('src.excel_processor.OUTPUT_DIR') as mock_output_dir:
                 mock_output_dir.__truediv__ = Mock(return_value=Path('/tmp/test_output.xlsx'))
                 
                 with patch('pandas.ExcelWriter') as mock_writer:
@@ -449,7 +445,7 @@ class TestIntegrationScenarios:
         
         try:
             # Mock only the file output operations
-            with patch('excel_processor.OUTPUT_DIR') as mock_output_dir:
+            with patch('src.excel_processor.OUTPUT_DIR') as mock_output_dir:
                 mock_output_dir.__truediv__ = Mock(return_value=Path('/tmp/test_output.xlsx'))
                 
                 with patch('pandas.ExcelWriter') as mock_writer:

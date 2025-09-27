@@ -2,18 +2,14 @@
 
 import pytest
 import pandas as pd
-import sys
 import tempfile
 import os
 from pathlib import Path
 from unittest.mock import patch, Mock
 
-# Add src to path for imports
-sys.path.append(str(Path(__file__).parent.parent.parent / "src"))
-
-from betting_framework import user_input_betting_framework
-from excel_processor import process_betting_excel, create_sample_excel_in_input_dir
-import main
+from src.betting_framework import user_input_betting_framework
+from src.excel_processor import process_betting_excel, create_sample_excel_in_input_dir
+from src import main
 
 
 class TestEndToEndWorkflow:
@@ -42,7 +38,7 @@ class TestEndToEndWorkflow:
         
         try:
             # Process through complete workflow
-            with patch('excel_processor.OUTPUT_DIR', Path(tempfile.gettempdir())):
+            with patch('src.excel_processor.OUTPUT_DIR', Path(tempfile.gettempdir())):
                 result_df, output_file = process_betting_excel(temp_file, 100.0)
                 
                 # Verify results
@@ -115,7 +111,7 @@ class TestEndToEndWorkflow:
             temp_file = tmp.name
         
         try:
-            with patch('excel_processor.OUTPUT_DIR', Path(tempfile.gettempdir())):
+            with patch('src.excel_processor.OUTPUT_DIR', Path(tempfile.gettempdir())):
                 result_df, output_file = process_betting_excel(temp_file, 10.0)  # Small bankroll
                 
                 for _, row in result_df.iterrows():
@@ -154,7 +150,7 @@ class TestEndToEndWorkflow:
             temp_file = tmp.name
         
         try:
-            with patch('excel_processor.OUTPUT_DIR', Path(tempfile.gettempdir())):
+            with patch('src.excel_processor.OUTPUT_DIR', Path(tempfile.gettempdir())):
                 result_df, output_file = process_betting_excel(temp_file, 100.0)
                 
                 # All should process successfully
@@ -221,7 +217,7 @@ class TestErrorHandlingIntegration:
             temp_file = tmp.name
         
         try:
-            with patch('excel_processor.OUTPUT_DIR', Path(tempfile.gettempdir())):
+            with patch('src.excel_processor.OUTPUT_DIR', Path(tempfile.gettempdir())):
                 # Should not crash, but may produce NO BET decisions or handle gracefully
                 result_df, output_file = process_betting_excel(temp_file, 100.0)
                 
@@ -236,29 +232,29 @@ class TestErrorHandlingIntegration:
 
 
 class TestMainIntegration:
-    """Test main.py integration with complete system"""
+    """Test src.main.py integration with complete system"""
     
-    @patch('main.input')
-    @patch('main.list_available_input_files')
+    @patch('src.main.input')
+    @patch('src.main.list_available_input_files')
     def test_main_single_bet_mode(self, mock_list_files, mock_input):
-        """Test main.py single bet mode integration"""
+        """Test src.main.py single bet mode integration"""
         # Mock user inputs
         mock_input.side_effect = ['1', '100', '68', '0.45', 'n']
         
         # Should run without error
         try:
             # This tests that the complete import and execution chain works
-            from main import main
+            from src.main import main
             # We can't easily test the full execution without mocking print statements
             # But we can verify imports work
             assert callable(main)
         except ImportError as e:
             pytest.fail(f"Main import failed: {e}")
     
-    @patch('main.input')
-    @patch('main.list_available_input_files')
+    @patch('src.main.input')
+    @patch('src.main.list_available_input_files')
     def test_main_excel_mode_integration(self, mock_list_files, mock_input):
-        """Test main.py Excel mode integration"""
+        """Test src.main.py Excel mode integration"""
         # Mock file listing and user inputs
         mock_list_files.return_value = ['sample_games.xlsx']
         mock_input.side_effect = ['2', '100', '1', 'n']
@@ -275,10 +271,10 @@ class TestMainIntegration:
                 })
                 sample_data.to_excel(tmp.name, sheet_name='Games', index=False)
             
-            with patch('main.get_input_file_path') as mock_get_path:
+            with patch('src.main.get_input_file_path') as mock_get_path:
                 mock_get_path.return_value = temp_file_path
                 
-                from main import main
+                from src.main import main
                 assert callable(main)
         finally:
             if temp_file_path and os.path.exists(temp_file_path):
@@ -306,7 +302,7 @@ class TestPerformanceIntegration:
             temp_file = tmp.name
         
         try:
-            with patch('excel_processor.OUTPUT_DIR', Path(tempfile.gettempdir())):
+            with patch('src.excel_processor.OUTPUT_DIR', Path(tempfile.gettempdir())):
                 import time
                 start_time = time.time()
                 
@@ -342,7 +338,7 @@ class TestPerformanceIntegration:
             temp_file = tmp.name
         
         try:
-            with patch('excel_processor.OUTPUT_DIR', Path(tempfile.gettempdir())):
+            with patch('src.excel_processor.OUTPUT_DIR', Path(tempfile.gettempdir())):
                 # Process multiple times to check for memory leaks
                 for _ in range(5):
                     result_df, output_file = process_betting_excel(temp_file, 500.0)
@@ -395,8 +391,8 @@ class TestConfigurationIntegration:
         assert isinstance(OUTPUT_DIR, Path)
         
         # Test that functions use these directories
-        with patch('excel_processor.INPUT_DIR', INPUT_DIR):
-            with patch('excel_processor.OUTPUT_DIR', OUTPUT_DIR):
+        with patch('src.excel_processor.INPUT_DIR', INPUT_DIR):
+            with patch('src.excel_processor.OUTPUT_DIR', OUTPUT_DIR):
                 # Should work with configured directories
                 sample_path = create_sample_excel_in_input_dir()
                 assert INPUT_DIR in sample_path.parents or sample_path.parent == INPUT_DIR

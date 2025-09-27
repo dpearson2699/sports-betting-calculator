@@ -1,13 +1,8 @@
 """Unit tests for betting_framework.py core functions"""
 
 import pytest
-import sys
-from pathlib import Path
 
-# Add src to path for imports
-sys.path.append(str(Path(__file__).parent.parent.parent / "src"))
-
-from betting_framework import (
+from src.betting_framework import (
     normalize_contract_price,
     calculate_whole_contracts,
     user_input_betting_framework
