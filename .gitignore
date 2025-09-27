@@ -1,10 +1,96 @@
-# Python-generated files
+# Byte-compiled / optimized / DLL files
 __pycache__/
-*.py[oc]
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
 build/
+develop-eggs/
 dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
 wheels/
-*.egg-info
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+# Unit test / coverage reports
+test-results/
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
 
 # Virtual environments
+.env
 .venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE and editor files
+.idea/
+*.swp
+*.swo
+*~
+# Keep .vscode/settings.json for Python path resolution
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Project specific files
+data/output/*.xlsx
+data/input/*.xlsx
+!data/input/sample_games.xlsx
+!data/input/.gitkeep
+!data/output/.gitkeep
+data/input/temp_*.xlsx
+data/input/*~*.xlsx
+*.tmp
+*.temp
+
+# Logs
+*.log
+
+# Local configuration files that might contain sensitive data
+.env.local
+.env.*.local
+local_settings.py
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
