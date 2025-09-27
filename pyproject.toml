@@ -94,6 +94,9 @@ markers = [
     "integration: Integration tests",
     "slow: Slow running tests",
     "excel: Tests requiring Excel files",
+    "property: Property-based tests",
+    "performance: Performance benchmark tests",
+    "mathematical: Mathematical accuracy validation tests",
 ]
 filterwarnings = [
     "ignore::DeprecationWarning",
