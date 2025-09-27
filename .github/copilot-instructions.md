@@ -220,4 +220,10 @@ available_files = list_available_input_files()
 Consistent `try/except ValueError` blocks for all user inputs with specific error messages for guidance.
 
 ### IDE Configuration
-**VS Code Python Path Resolution**: The project includes `.vscode/settings.json` with `"python.analysis.extraPaths": ["./src"]` to help Pylance resolve imports correctly. After installing with `uv pip install -e .`, full intellisense and navigation work properly with the standard package structure.
+**VS Code Python Path Resolution**: The project includes `.vscode/settings.json` with:
+- `"python.analysis.extraPaths": ["./src"]` to help Pylance resolve imports correctly
+- `"python.defaultInterpreterPath": "./.venv/Scripts/python.exe"` for virtual environment integration
+- `"python.testing.pytestEnabled": true` with pytest configuration
+- File exclusions for `__pycache__`, test results, and coverage files
+
+After installing with `uv pip install -e .`, full intellisense and navigation work properly with the standard package structure.
