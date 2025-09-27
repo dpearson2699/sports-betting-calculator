@@ -1,8 +1,7 @@
 # Sports Betting Calculator: Find Mispriced Event Contracts Using Kelly Criterion
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![Tests](https://github.com/USERNAME/betting-framework/workflows/CI/badge.svg)](https://github.com/USERNAME/betting-framework/actions)
-[![Coverage](https://img.shields.io/badge/coverage-93%25-green.svg)](https://github.com/USERNAME/betting-framework)
+[![Coverage](https://img.shields.io/badge/coverage-93%25-green.svg)](#-testing--development)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A professional sports betting framework based on academic research, implementing the Kelly Criterion with safety constraints for optimal bankroll management.
@@ -11,7 +10,7 @@ A professional sports betting framework based on academic research, implementing
 
 ## 🎯 Features
 
-- **📚 Wharton-Optimized**: Based on academic research with 10% expected value threshold
+- **📚 Research-Based EV Filtering**: Only recommends bets with 10%+ expected value (based on academic studies)
 - **📊 Kelly Criterion**: Uses Half-Kelly sizing for optimal risk-adjusted returns
 - **🛡️ Safety Constraints**: Maximum 15% of bankroll per bet
 - **📈 Batch Processing**: Analyze multiple games via Excel with automatic ranking
