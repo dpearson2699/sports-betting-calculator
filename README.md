@@ -26,11 +26,8 @@ A professional sports betting framework based on academic research, implementing
 # Clone or download this project
 cd betting-framework
 
-# Install dependencies with uv (recommended)
+# Install dependencies with uv
 uv sync
-
-# Or use pip
-pip install pandas openpyxl
 ```
 
 ### Usage
@@ -38,11 +35,12 @@ pip install pandas openpyxl
 #### Running the Application
 
 ```bash
-# Run the application (recommended)
+# Recommended method
 python run.py
 
-# Or use uv
-uv run run.py
+# Alternative methods
+uv run sports-betting-calculator  # Using script entry point
+uv run run.py                     # Using uv directly
 ```
 
 #### Interactive Mode (Single Bet)
@@ -56,6 +54,19 @@ Choose option 2 for batch processing. The application will:
 1. Show available Excel files in `data/input/` directory
 2. Let you select a file or create a sample
 3. Process the selected file and save results to `data/output/`
+
+### 📊 Excel File Format
+
+Your Excel file should have these columns:
+
+| Column | Description | Example |
+|--------|-------------|----------|
+| `Game` | Game identifier | "Lakers vs Warriors" |
+| `Model Win Percentage` | Your model's win probability | 68 (or 0.68) |
+| `Model Margin` | Predicted margin (optional) | 3.5 |
+| `Contract Price` | Sportsbook price per unit | 0.45 |
+
+> 💡 **Tip**: When you first run the application and choose Excel batch mode, if no Excel files are found, you'll see the prompt: `"No Excel files found in data/input/ directory. Create sample Excel file? (y/n)"`. Choose 'y' to create a `sample_games.xlsx` file that shows the exact format required and includes example data you can use for testing.
 
 ## 📁 Project Structure
 
