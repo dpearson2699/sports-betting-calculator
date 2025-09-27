@@ -36,6 +36,7 @@ pip install pandas openpyxl
 ### Usage
 
 #### Running the Application
+
 ```bash
 # Run the application (recommended)
 python run.py
@@ -45,40 +46,57 @@ uv run run.py
 ```
 
 #### Interactive Mode (Single Bet)
+
 Choose option 1 for single bet analysis
 
 #### Excel Batch Mode (Multiple Games)
+
 Choose option 2 for batch processing. The application will:
+
 1. Show available Excel files in `data/input/` directory
 2. Let you select a file or create a sample
 3. Process the selected file and save results to `data/output/`
 
 ## 📁 Project Structure
 
-```
-betting-framework/
-├── src/                          # Source code
-│   ├── betting_framework.py      # Core Kelly/Wharton logic
-│   ├── excel_processor.py        # Excel processing & bankroll allocation
+```text
+sports-betting-calculator/
+├── .github/                      # GitHub configuration
+├── .vscode/                      # VS Code settings
+├── config/                       # Configuration files
+│   └── settings.py               # Framework settings & constants
+├── data/                         # Data directories (auto-created)
+│   ├── input/                    # Excel files for batch processing
+│   └── output/                   # Generated results files
+├── examples/                     # Usage examples
+│   ├── basic_usage.py            # Single bet example
+│   ├── excel_batch_example.py    # Batch processing example
+│   └── README.md                 # Examples documentation
+├── src/                          # Core source code
+│   ├── __init__.py               # Package initialization
+│   ├── betting_framework.py      # Kelly Criterion & EV calculations
+│   ├── excel_processor.py        # Excel I/O & bankroll allocation
 │   └── main.py                   # CLI interface
+├── test-results/                 # Test output (auto-generated)
+│   └── coverage/                 # HTML coverage reports
 ├── tests/                        # Comprehensive test suite
-│   ├── unit/                     # Unit tests (47 tests)
-│   │   ├── test_betting_framework.py
-│   │   └── test_excel_processor.py
-│   ├── integration/              # End-to-end tests
-│   ├── conftest.py               # Test fixtures & configuration
-│   └── fixtures/                 # Test data
-├── data/
-│   ├── input/                    # Place your Excel files here
-│   │   └── sample_games.xlsx     # Auto-generated sample
-│   └── output/                   # Results appear here
-│       └── *_RESULTS.xlsx        # Generated analysis files
-├── config/
-│   └── settings.py               # Configuration settings
-├── run.py                        # Main entry point
-├── run_tests.py                  # Test runner script
-├── TEST_GUIDE.md                 # Testing documentation
-└── pyproject.toml                # Dependencies & test config
+│   ├── __init__.py               # Test package initialization
+│   ├── conftest.py               # Shared fixtures & test configuration
+│   ├── integration/              # End-to-end workflow tests
+│   │   ├── __init__.py
+│   │   └── test_end_to_end.py
+│   └── unit/                     # Unit tests for individual components
+│       ├── __init__.py
+│       ├── test_betting_framework.py
+│       └── test_excel_processor.py
+├── CONTRIBUTING.md               # Contribution guidelines
+├── LICENSE                       # MIT license
+├── mathematical-foundation.md    # Academic research documentation
+├── pyproject.toml                # Dependencies & project configuration
+├── README.md                     # This file
+├── run.py                        # Main application entry point
+├── SECURITY.md                   # Security policy
+└── uv.lock                       # Dependency lock file
 ```
 
 ## 🧪 Testing & Development
@@ -103,12 +121,14 @@ uv run pytest --cov=src --cov-report=html
 ```
 
 ### Test Coverage
+
 - **47 comprehensive tests** covering all major functionality
 - **97% coverage** on core betting framework logic
 - **93% coverage** on Excel processing and allocation
 - Tests include: mathematical accuracy, Wharton compliance, edge cases, error handling
 
 ### Recent Improvements
+
 - ✅ **Bug Fix**: Fixed bankroll allocation logic for zero remaining funds
 - ✅ **Enhanced Testing**: Added comprehensive test suite with fixtures
 - ✅ **Code Quality**: Improved error handling and validation
@@ -128,6 +148,7 @@ Your Excel file should have these columns:
 ## 🔧 How It Works
 
 ### Core Algorithm
+
 1. **Expected Value Calculation**: `EV = (Win_Probability × (1/Contract_Price)) - 1`
 2. **Wharton Filter**: Only bet if EV ≥ 10% (academic research requirement)
 3. **Kelly Sizing**: Calculate optimal bet size using Kelly Criterion
@@ -138,6 +159,7 @@ Your Excel file should have these columns:
 8. **Allocation**: Rank by EV%, allocate bankroll to best opportunities first
 
 ### Mathematical Formula
+
 ```python
 # Expected Value
 ev_per_dollar = win_probability * (1/adjusted_price) - 1
@@ -161,11 +183,13 @@ actual_bet_amount = whole_contracts * adjusted_price
 The Excel processor creates a `*_RESULTS.xlsx` file with two sheets:
 
 ### Quick View Sheet
+
 - Simplified overview with key metrics
 - Game, Win %, Edge %, Stake $, Expected Value
 - Final recommendations after bankroll allocation
 
 ### Detailed Results Sheet
+
 - Complete analysis with all calculations
 - Original game data and betting recommendations
 - Expected value percentages and bet amounts
@@ -175,7 +199,7 @@ The Excel processor creates a `*_RESULTS.xlsx` file with two sheets:
 
 ## 💡 Example Results
 
-```
+```text
 BETTING ANALYSIS SUMMARY
 ============================================================
 Total Games Analyzed: 6
@@ -196,6 +220,7 @@ Yankees vs Red Sox: $15.00 (EV: 12.4%)
 ## 🛠️ Development
 
 ### Key Files
+
 - `src/betting_framework.py` - Core betting logic and Kelly calculations
 - `src/excel_processor.py` - Excel file processing and batch analysis  
 - `src/main.py` - Interactive CLI interface
@@ -204,7 +229,9 @@ Yankees vs Red Sox: $15.00 (EV: 12.4%)
 - `tests/` - Comprehensive test suite with 47 tests
 
 ### Configuration
+
 Edit `config/settings.py` to modify:
+
 - `MIN_EV_THRESHOLD = 10.0` - Minimum expected value percentage
 - `HALF_KELLY_MULTIPLIER = 0.5` - Kelly fraction multiplier  
 - `MAX_BET_PERCENTAGE = 0.15` - Maximum bet as fraction of bankroll
@@ -231,6 +258,7 @@ Edit `config/settings.py` to modify:
 ## 🎓 Academic Foundation
 
 This framework implements methodology based on:
+
 - **Kelly Criterion**: Optimal bet sizing for maximum logarithmic growth
 - **Wharton Research**: 10% EV threshold for sustainable profitability
 - **Half-Kelly Strategy**: Reduced volatility while maintaining growth
