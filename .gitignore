@@ -76,7 +76,6 @@ Thumbs.db
 # Project specific files
 data/output/*.xlsx
 data/input/*.xlsx
-!data/input/sample_games.xlsx
 !data/input/.gitkeep
 !data/output/.gitkeep
 data/input/temp_*.xlsx
