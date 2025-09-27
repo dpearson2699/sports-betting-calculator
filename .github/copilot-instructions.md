@@ -4,7 +4,7 @@
 This is a research-driven Kelly Criterion betting calculator with Robinhood whole-contract constraints. The system analyzes sports betting opportunities using academic research principles to identify profitable betting opportunities while maintaining strict risk management.
 
 ## Key Technologies & Architecture
-- **Language**: Python 3.11+
+- **Language**: Python 3.13+
 - **Core Dependencies**: pandas, openpyxl 
 - **Testing**: pytest with 102 tests, 95% coverage
 - **Package Management**: uv (preferred) or pip
@@ -44,10 +44,13 @@ This is a research-driven Kelly Criterion betting calculator with Robinhood whol
 - Console summary comes from `display_summary()`; adjust totals there when altering allocation math.
 
 ## Dev workflow
-- Use `uv sync` (add `--extra test` or `--extra dev` as needed) and avoid raw `pip`.
+- Use `uv sync --extra all` (add `--extra test` or `--extra dev` as needed) and avoid raw `pip`.
 - Preferred runs: `python run.py`, or `uv run sports-betting-calculator`.
 - Tests: `uv run pytest`, `uv run pytest tests/unit/`, and `uv run pytest tests/integration/`; 102 tests should stay green.
 - Coverage badge derives from `scripts/generate_coverage_badge.py` and pushes to `coverage-badge.json`.
+- Python version badge derives from `scripts/generate_python_badge.py` and pushes to `python-badge.json`.
+- Code quality tools: `uv run black .`, `uv run flake8`, `uv run bandit -r src/`, `uv run safety check`.
+- Python version requirement: 3.13+ (updated from 3.11+)
 
 ## Gotchas & tips
 - Folder paths are relative; never hardcode absolute locations outside `config`.
@@ -81,7 +84,8 @@ This is a research-driven Kelly Criterion betting calculator with Robinhood whol
 - **Import errors**: Ensure Python path includes `src/` directory; use `python run.py` for consistent behavior
 - **Excel errors**: Verify required columns (`Game`, `Model Win Percentage`, `Contract Price`) exist; optional `Model Margin`
 - **All "NO BET" results**: Check that win percentages and prices result in EV ≥ 10%
-- **Test failures**: Run `uv sync` first, then `uv run pytest -v` for detailed output
+- **Test failures**: Run `uv sync --extra all` first, then `uv run pytest -v` for detailed output
+- **Python version**: Requires Python 3.13+ (check with `python --version`)
 - **Mathematical precision**: Use existing helper functions for percentage/price normalization to maintain consistency
 
 ## Files You'll Work With Most
@@ -91,3 +95,5 @@ This is a research-driven Kelly Criterion betting calculator with Robinhood whol
 - `config/settings.py` - All constants, thresholds, and configuration
 - `tests/unit/test_betting_framework.py` - Key business logic tests
 - `tests/integration/test_end_to_end.py` - Full workflow validation
+- `scripts/generate_coverage_badge.py` - Coverage badge generation
+- `scripts/generate_python_badge.py` - Python version badge generation
