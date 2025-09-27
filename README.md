@@ -268,22 +268,27 @@ This framework implements methodology based on:
 
 ### Common Issues
 
-**"No Excel files found in data/input/"**
+#### "No Excel files found in data/input/"
+
 - Solution: Use option to create sample file, or add your Excel files to `data/input/` directory
 
-**"Missing required columns" error**
+#### "Missing required columns" error
+
 - Solution: Ensure Excel file has columns: `Game`, `Model Win Percentage`, `Contract Price`
 - Optional column: `Model Margin`
 
-**All bets showing "NO BET"**
+#### All bets showing "NO BET"
+
 - Cause: Expected values below 10% threshold (Wharton requirement)
 - Solution: Check your win percentages and contract prices for accuracy
 
-**Import errors in VS Code**
+#### Import errors in VS Code
+
 - Solution: The `.vscode/settings.json` file should resolve Python path issues
 - Alternative: Use `python run.py` instead of running files directly
 
-**Tests failing**
+#### Tests failing
+
 - Run: `python run_tests.py` to see detailed output
 - Check: Python version (requires 3.11+) and dependencies (`uv sync`)
 
