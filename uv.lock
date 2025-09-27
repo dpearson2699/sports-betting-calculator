@@ -30,6 +30,15 @@ wheels = [
 ]
 
 [[package]]
+name = "attrs"
+version = "25.3.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/5a/b0/1367933a8532ee6ff8d63537de4f1177af4bff9f3e829baf7331f595bb24/attrs-25.3.0.tar.gz", hash = "sha256:75d7cefc7fb576747b2c81b4442d4d4a1ce0900973527c011d1030fd3bf4af1b", size = 812032, upload-time = "2025-03-13T11:10:22.779Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/77/06/bb80f5f86020c4551da315d78b3ab75e8228f89f0162f2c3a819e407941a/attrs-25.3.0-py3-none-any.whl", hash = "sha256:427318ce031701fea540783410126f03899a97ffc6f61596ad581ac2e40e3bc3", size = 63815, upload-time = "2025-03-13T11:10:21.14Z" },
+]
+
+[[package]]
 name = "authlib"
 version = "1.6.4"
 source = { registry = "https://pypi.org/simple" }
@@ -411,6 +420,18 @@ wheels = [
 ]
 
 [[package]]
+name = "faker"
+version = "37.8.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "tzdata" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/3a/da/1336008d39e5d4076dddb4e0f3a52ada41429274bf558a3cc28030d324a3/faker-37.8.0.tar.gz", hash = "sha256:090bb5abbec2b30949a95ce1ba6b20d1d0ed222883d63483a0d4be4a970d6fb8", size = 1912113, upload-time = "2025-09-15T20:24:13.592Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/f5/11/02ebebb09ff2104b690457cb7bc6ed700c9e0ce88cf581486bb0a5d3c88b/faker-37.8.0-py3-none-any.whl", hash = "sha256:b08233118824423b5fc239f7dd51f145e7018082b4164f8da6a9994e1f1ae793", size = 1953940, upload-time = "2025-09-15T20:24:11.482Z" },
+]
+
+[[package]]
 name = "filelock"
 version = "3.19.1"
 source = { registry = "https://pypi.org/simple" }
@@ -468,6 +489,19 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/b1/df/48c586a5fe32a0f01324ee087459e112ebb7224f646c0b5023f5e79e9956/httpx-0.28.1.tar.gz", hash = "sha256:75e98c5f16b0f35b567856f597f06ff2270a374470a5c2392242528e3e3e42fc", size = 141406, upload-time = "2024-12-06T15:37:23.222Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/2a/39/e50c7c3a983047577ee07d2a9e53faf5a69493943ec3f6a384bdc792deb2/httpx-0.28.1-py3-none-any.whl", hash = "sha256:d909fcccc110f8c7faf814ca82a9a4d816bc5a6dbfea25d6591d6985b8ba59ad", size = 73517, upload-time = "2024-12-06T15:37:21.509Z" },
+]
+
+[[package]]
+name = "hypothesis"
+version = "6.140.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "attrs" },
+    { name = "sortedcontainers" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/ad/4a/3c340178b986b44b4f71ddb04625c8fb8bf815e7c7e23a6aabb2ce17e849/hypothesis-6.140.2.tar.gz", hash = "sha256:b3b4a162134eeef8a992621de6c43d80e03d44704a3c3bfb5b9d0661b375b0d2", size = 466699, upload-time = "2025-09-23T00:07:21.087Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e9/7d/7dd3684f9cb707b6b1e808c7f23dd0fa4a96fe106b6accd9b757c9985c50/hypothesis-6.140.2-py3-none-any.whl", hash = "sha256:4524cb84be90961563ef15634e2efe96150bbcce47621a13cff3c1b03a326663", size = 534388, upload-time = "2025-09-23T00:07:16.555Z" },
 ]
 
 [[package]]
@@ -807,6 +841,15 @@ wheels = [
 ]
 
 [[package]]
+name = "py-cpuinfo"
+version = "9.0.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/37/a8/d832f7293ebb21690860d2e01d8115e5ff6f2ae8bbdc953f0eb0fa4bd2c7/py-cpuinfo-9.0.0.tar.gz", hash = "sha256:3cdbbf3fac90dc6f118bfd64384f309edeadd902d7c8fb17f02ffa1fc3f49690", size = 104716, upload-time = "2022-10-25T20:38:06.303Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e0/a9/023730ba63db1e494a271cb018dcd361bd2c917ba7004c3e49d5daf795a2/py_cpuinfo-9.0.0-py3-none-any.whl", hash = "sha256:859625bc251f64e21f077d099d4162689c762b5d6a4c3c97553d56241c9674d5", size = 22335, upload-time = "2022-10-25T20:38:27.636Z" },
+]
+
+[[package]]
 name = "pycodestyle"
 version = "2.14.0"
 source = { registry = "https://pypi.org/simple" }
@@ -936,6 +979,19 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/a3/5c/00a0e072241553e1a7496d638deababa67c5058571567b92a7eaa258397c/pytest-8.4.2.tar.gz", hash = "sha256:86c0d0b93306b961d58d62a4db4879f27fe25513d4b969df351abdddb3c30e01", size = 1519618, upload-time = "2025-09-04T14:34:22.711Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a8/a4/20da314d277121d6534b3a980b29035dcd51e6744bd79075a6ce8fa4eb8d/pytest-8.4.2-py3-none-any.whl", hash = "sha256:872f880de3fc3a5bdc88a11b39c9710c3497a547cfa9320bc3c5e62fbf272e79", size = 365750, upload-time = "2025-09-04T14:34:20.226Z" },
+]
+
+[[package]]
+name = "pytest-benchmark"
+version = "5.1.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "py-cpuinfo" },
+    { name = "pytest" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/39/d0/a8bd08d641b393db3be3819b03e2d9bb8760ca8479080a26a5f6e540e99c/pytest-benchmark-5.1.0.tar.gz", hash = "sha256:9ea661cdc292e8231f7cd4c10b0319e56a2118e2c09d9f50e1b3d150d2aca105", size = 337810, upload-time = "2024-10-30T11:51:48.521Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/9e/d6/b41653199ea09d5969d4e385df9bbfd9a100f28ca7e824ce7c0a016e3053/pytest_benchmark-5.1.0-py3-none-any.whl", hash = "sha256:922de2dfa3033c227c96da942d1878191afa135a29485fb942e85dff1c592c89", size = 44259, upload-time = "2024-10-30T11:51:45.94Z" },
 ]
 
 [[package]]
@@ -1336,9 +1392,22 @@ wheels = [
 ]
 
 [[package]]
+name = "sortedcontainers"
+version = "2.4.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/e8/c4/ba2f8066cceb6f23394729afe52f3bf7adec04bf9ed2c820b39e19299111/sortedcontainers-2.4.0.tar.gz", hash = "sha256:25caa5a06cc30b6b83d11423433f65d1f9d76c4c6a0c90e3379eaa43b9bfdb88", size = 30594, upload-time = "2021-05-16T22:03:42.897Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/32/46/9cb0e58b2deb7f82b84065f37f3bffeb12413f947f9388e4cac22c4621ce/sortedcontainers-2.4.0-py2.py3-none-any.whl", hash = "sha256:a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0", size = 29575, upload-time = "2021-05-16T22:03:41.177Z" },
+]
+
+[[package]]
 name = "sports-betting-calculator"
 version = "0.1.0"
 source = { editable = "." }
+dependencies = [
+    { name = "openpyxl" },
+    { name = "pandas" },
+]
 
 [package.optional-dependencies]
 all = [

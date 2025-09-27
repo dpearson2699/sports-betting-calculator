@@ -50,6 +50,9 @@ test = [
     "pytest-mock>=3.12.0",
     "pytest-xdist>=3.5.0",
     "pytest-html>=4.1.0",
+    "hypothesis>=6.70.0",
+    "pytest-benchmark>=4.0.0",
+    "faker>=18.0.0",
 ]
 dev = [
     "black>=24.0.0",
