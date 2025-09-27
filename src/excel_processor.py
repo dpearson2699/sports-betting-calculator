@@ -1,13 +1,17 @@
 import pandas as pd
 import os
 from pathlib import Path
-import sys
 
-# Add parent directory to path for config imports
-sys.path.append(str(Path(__file__).parent.parent))
-
-from betting_framework import user_input_betting_framework
-from config.settings import INPUT_DIR, OUTPUT_DIR, DEFAULT_SAMPLE_FILE, DEFAULT_SHEET_NAME, MAX_COLUMN_WIDTH, COLUMN_PADDING, COMMISSION_PER_CONTRACT
+from .betting_framework import user_input_betting_framework
+from config import (
+    INPUT_DIR, 
+    OUTPUT_DIR, 
+    DEFAULT_SAMPLE_FILE, 
+    DEFAULT_SHEET_NAME, 
+    MAX_COLUMN_WIDTH, 
+    COLUMN_PADDING, 
+    COMMISSION_PER_CONTRACT
+)
 
 # Centralized column configuration
 COLUMN_CONFIG = {

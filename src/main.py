@@ -1,20 +1,16 @@
 #!/usr/bin/env python3
 """Wharton Betting Framework - Main Interface"""
 
-import sys
 from pathlib import Path
 
-# Add parent directory to path for config imports
-sys.path.append(str(Path(__file__).parent.parent))
-
-from betting_framework import user_input_betting_framework
-from excel_processor import (
+from .betting_framework import user_input_betting_framework
+from .excel_processor import (
     process_betting_excel, 
     create_sample_excel_in_input_dir, 
     list_available_input_files,
     get_input_file_path
 )
-from config.settings import INPUT_DIR, OUTPUT_DIR
+from config import INPUT_DIR, OUTPUT_DIR
 
 def interactive_single_bet():
     """Interactive mode for single bet analysis"""
