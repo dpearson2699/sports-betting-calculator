@@ -79,15 +79,14 @@ uv pip install -e .              # Enable proper package imports
 python run.py                     # PREFERRED entry point
 uv run sports-betting-calculator  # Alternative using package script
 
-# Test suite (47+ comprehensive tests achieving 93%+ coverage)
-python run_tests.py               # All tests with coverage report
-python run_tests.py unit          # Unit tests only (tests/unit/)
-python run_tests.py integration   # Integration tests only (tests/integration/)  
-python run_tests.py quick         # Fast tests only (exclude @pytest.mark.slow)
-python run_tests.py -v            # Verbose output
-python run_tests.py --no-cov      # Skip coverage reporting
-uv run pytest -v                  # Direct pytest with verbose output
-uv run pytest --cov=src --cov-report=html  # Generate htmlcov/ directory
+# Test suite (60 comprehensive tests achieving 97%+ coverage)
+uv run pytest                     # All tests with coverage report
+uv run pytest tests/unit/         # Unit tests only
+uv run pytest tests/integration/  # Integration tests only  
+uv run pytest -m "not slow"       # Fast tests only (exclude @pytest.mark.slow)
+uv run pytest -v                  # Verbose output
+uv run pytest --no-cov            # Skip coverage reporting
+uv run pytest --cov-report=html   # Generate test-results/coverage/ directory
 
 # Examples and validation (after development install)
 python examples/basic_usage.py         # Demonstrate single bet patterns
@@ -172,7 +171,7 @@ actual_bet_amount = whole_contracts * contract_price
 - **Unit tests**: `tests/unit/` for individual component testing
 - **Integration tests**: `tests/integration/` for end-to-end workflows  
 - **Fixtures**: `tests/conftest.py` provides `wharton_test_cases`, `sample_excel_data`, `edge_case_test_data`
-- **Test runners**: Use `python run_tests.py [unit|integration|quick]` or direct `uv run pytest`
+- **Test runners**: Use standard `uv run pytest` commands with built-in options
 - **Coverage**: 97% on core betting logic, 93% on Excel processing
 
 **Manual validation pattern** for quick verification:
