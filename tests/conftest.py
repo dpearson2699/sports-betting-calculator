@@ -154,14 +154,18 @@ class TestDataBuilder:
     """Helper class to build test data dynamically"""
     
     @staticmethod
-    def create_game_data(win_pct: float, price: float, margin: float = None) -> Dict[str, Any]:
+    def create_game_data(win_pct: float, price: float, margin: Optional[float] = None) -> Dict[str, Any]:
         """Create a single game data entry"""
-        return {
+        game_data = {
             'Game': f'Test Game (Win: {win_pct}%, Price: ${price})',
             'Model Win Percentage': win_pct,
             'Contract Price': price,
-            'Model Margin': margin
         }
+        
+        if margin is not None:
+            game_data['Model Margin'] = margin
+        
+        return game_data
     
     @staticmethod
     def create_excel_dataframe(games: List[Dict[str, Any]]) -> pd.DataFrame:

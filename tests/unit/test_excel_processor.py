@@ -171,7 +171,8 @@ class TestBankrollAllocation:
         assert result_df.loc[0, 'Cumulative Bet Amount'] == 60.0
         
         # Second bet should get partial allocation
-        assert 'PARTIAL BET' in result_df.loc[1, 'Final Recommendation']
+        final_recommendation = str(result_df.loc[1, 'Final Recommendation'])
+        assert 'PARTIAL BET' in final_recommendation
         assert result_df.loc[1, 'Cumulative Bet Amount'] == 40.0
         
         # Third bet should be skipped
