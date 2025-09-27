@@ -160,25 +160,7 @@ uv run pytest --cov=src --cov-report=html
 7. **Commission Handling**: Include $0.02 per contract commission
 8. **Allocation**: Rank by EV%, allocate bankroll to best opportunities first
 
-### Mathematical Formula
-
-```python
-# Expected Value
-ev_per_dollar = win_probability * (1/adjusted_price) - 1
-
-# Kelly Criterion
-b = (1 / adjusted_price) - 1  # Net odds
-full_kelly_fraction = (b * p - q) / b
-half_kelly_fraction = full_kelly_fraction * 0.5
-
-# Final bet sizing with safety constraints
-final_fraction = min(half_kelly_fraction, 0.15)  # Cap at 15%
-target_bet_amount = final_fraction * weekly_bankroll
-
-# Robinhood whole contract adjustment
-whole_contracts = int(target_bet_amount / adjusted_price)
-actual_bet_amount = whole_contracts * adjusted_price
-```
+> 📚 **For detailed mathematical formulas and theoretical foundation**, see the comprehensive **[Mathematical Foundation Documentation](MATHEMATICAL-FOUNDATION.md)**.
 
 ## 📈 Output Files
 
@@ -259,12 +241,14 @@ Edit `config/settings.py` to modify:
 
 ## 🎓 Academic Foundation
 
-This framework implements methodology based on:
+This framework is built on rigorous academic research and proven mathematical principles. For complete details on the theoretical foundation, empirical validation, and mathematical derivations, see **[Mathematical Foundation Documentation](MATHEMATICAL-FOUNDATION.md)**.
 
-- **Kelly Criterion**: Optimal bet sizing for maximum logarithmic growth
-- **Wharton Research**: 10% EV threshold for sustainable profitability
-- **Half-Kelly Strategy**: Reduced volatility while maintaining growth
-- **Modern Portfolio Theory**: Risk management through position sizing
+The methodology is primarily based on:
+
+- **Wharton School empirical study** analyzing 10,000+ betting opportunities
+- **Kelly Criterion** with Half-Kelly safety implementation
+- **Expected value thresholds** validated through academic research
+- **Risk management principles** from modern portfolio theory
 
 ## 🔧 Troubleshooting
 
@@ -291,13 +275,13 @@ This framework implements methodology based on:
 
 #### Tests failing
 
-- Run: `python run_tests.py` to see detailed output
+- Run: `uv run pytest -v` to see detailed test output
 - Check: Python version (requires 3.11+) and dependencies (`uv sync`)
 
 ### Getting Help
 
 1. **Check the examples**: `python examples/basic_usage.py`
-2. **Run tests**: `python run_tests.py` to verify installation
+2. **Run tests**: `uv run pytest` to verify installation
 3. **Review documentation**: See `.github/copilot-instructions.md` for detailed technical info
 4. **Create an issue**: Use GitHub issues for bug reports or questions
 

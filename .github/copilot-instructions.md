@@ -2,7 +2,7 @@
 
 ## Project Architecture
 
-This is an **academic research-based event contract betting framework** implementing Kelly Criterion with empirically-validated safety constraints. The codebase prioritizes mathematical rigor and risk management over general flexibility, with algorithms informed by comprehensive academic research (see `mathematical-foundation.md`).
+This is an **academic research-based event contract betting framework** implementing Kelly Criterion with empirically-validated safety constraints. The codebase prioritizes mathematical rigor and risk management over general flexibility, with algorithms informed by comprehensive academic research (see `MATHEMATICAL-FOUNDATION.md`).
 
 ### Core Components & Data Flow
 
