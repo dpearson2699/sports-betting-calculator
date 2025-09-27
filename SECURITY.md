@@ -33,6 +33,7 @@ The Event Contract Betting Framework maintainer takes security seriously. If you
 ## Security Considerations
 
 ### Input Validation
+
 This framework processes user financial data. Key security measures:
 
 - All numeric inputs are validated and sanitized
@@ -41,12 +42,14 @@ This framework processes user financial data. Key security measures:
 - File paths are validated to prevent directory traversal
 
 ### Data Privacy
+
 - No user data is transmitted over networks
 - All processing is local
 - No telemetry or analytics collection
 - Sample data uses generic team names only
 
 ### Financial Safety
+
 - Mathematical calculations are thoroughly tested
 - Safety constraints prevent excessive betting amounts
 - All financial formulas are academically verified
@@ -55,6 +58,7 @@ This framework processes user financial data. Key security measures:
 ## Known Security Boundaries
 
 ### What This Framework Does NOT Do
+
 - Network communication
 - Credential storage
 - External API access
@@ -62,7 +66,9 @@ This framework processes user financial data. Key security measures:
 - Data persistence beyond local files
 
 ### Dependencies
+
 We regularly audit dependencies for known vulnerabilities:
+
 - Pandas: Used for data processing
 - OpenPyXL: Used for Excel file handling
 - Pytest: Used for testing (dev dependency only)
@@ -78,6 +84,7 @@ We regularly audit dependencies for known vulnerabilities:
 ## Security Updates
 
 Security updates will be:
+
 - Released promptly for high-severity issues
 - Documented in release notes
 - Tagged with security advisory labels
