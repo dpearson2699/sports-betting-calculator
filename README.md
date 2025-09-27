@@ -226,7 +226,7 @@ Edit `config/settings.py` to modify:
 
 ## ⚙️ Requirements
 
-- Python 3.11+
+- Python 3.13+
 - pandas ≥ 2.3.2
 - openpyxl ≥ 3.1.5
 - pytest ≥ 8.0.0 (for testing)
@@ -279,7 +279,7 @@ The methodology is primarily based on:
 #### Tests failing
 
 - Run: `uv run pytest -v` to see detailed test output
-- Check: Python version (requires 3.11+) and dependencies (`uv sync`)
+- Check: Python version (requires 3.13+) and dependencies (`uv sync`)
 
 ### Getting Help
 

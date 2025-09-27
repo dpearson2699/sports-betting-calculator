@@ -7,7 +7,7 @@ name = "sports-betting-calculator"
 version = "0.1.0"
 description = "Find mispriced event contracts and optimize betting strategies using Kelly Criterion and academic research"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.13"
 license = {text = "MIT"}
 authors = [
     {name = "Derek Pearson"},
@@ -129,7 +129,7 @@ exclude_lines = [
 
 [tool.black]
 line-length = 88
-target-version = ['py311']
+target-version = ['py313']
 include = '\.pyi?$'
 extend-exclude = '''
 /(
