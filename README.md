@@ -1,7 +1,7 @@
 # Sports Betting Calculator: Find Mispriced Event Contracts Using Kelly Criterion
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![Coverage](https://img.shields.io/badge/coverage-93%25-green.svg)](#-testing--development)
+[![Coverage](https://img.shields.io/badge/coverage-95%25-green.svg)](#-testing--development)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A professional sports betting framework based on academic research, implementing the Kelly Criterion with safety constraints for optimal bankroll management.
@@ -15,7 +15,7 @@ A professional sports betting framework based on academic research, implementing
 - **🛡️ Safety Constraints**: Maximum 15% of bankroll per bet
 - **📈 Batch Processing**: Analyze multiple games via Excel with automatic ranking
 - **💰 Bankroll Allocation**: Prevents over-betting by prioritizing highest EV opportunities
-- **🧪 Comprehensive Testing**: 47 unit tests with 93% code coverage
+- **🧪 Comprehensive Testing**: 102 tests including property-based validation with 95% code coverage
 - **🔧 Robinhood Integration**: Whole contract calculations with commission handling
 
 ## 🚀 Quick Start
@@ -85,13 +85,17 @@ sports-betting-calculator/
 │   ├── integration/              # End-to-end workflow tests
 │   │   ├── __init__.py
 │   │   └── test_end_to_end.py
+│   ├── property/                 # Property-based tests using Hypothesis
+│   │   └── test_property_based.py
 │   └── unit/                     # Unit tests for individual components
 │       ├── __init__.py
 │       ├── test_betting_framework.py
-│       └── test_excel_processor.py
+│       ├── test_excel_processor.py
+│       ├── test_main.py
+│       └── test_missing_coverage.py
 ├── CONTRIBUTING.md               # Contribution guidelines
 ├── LICENSE                       # MIT license
-├── mathematical-foundation.md    # Academic research documentation
+├── MATHEMATICAL-FOUNDATION.md    # Academic research documentation
 ├── pyproject.toml                # Dependencies & project configuration
 ├── README.md                     # This file
 ├── run.py                        # Main application entry point
@@ -108,13 +112,16 @@ sports-betting-calculator/
 uv sync --extra test
 
 # Run all tests
-python run_tests.py
+uv run pytest
 
 # Run only unit tests
-python run_tests.py unit
+uv run pytest tests/unit/
 
-# Run quick tests (fast only)
-python run_tests.py quick
+# Run integration tests
+uv run pytest tests/integration/
+
+# Run property-based tests
+uv run pytest tests/property/
 
 # Generate coverage report
 uv run pytest --cov=src --cov-report=html
@@ -122,34 +129,18 @@ uv run pytest --cov=src --cov-report=html
 
 ### Test Coverage
 
-- **47 comprehensive tests** covering all major functionality
+- **102 comprehensive tests** covering all major functionality
 - **97% coverage** on core betting framework logic
-- **93% coverage** on Excel processing and allocation
-- Tests include: mathematical accuracy, Wharton compliance, edge cases, error handling
-
-### Recent Improvements
-
-- ✅ **Bug Fix**: Fixed bankroll allocation logic for zero remaining funds
-- ✅ **Enhanced Testing**: Added comprehensive test suite with fixtures
-- ✅ **Code Quality**: Improved error handling and validation
-- ✅ **Documentation**: Added detailed testing guides and API docs
-
-## 📊 Excel File Format
-
-Your Excel file should have these columns:
-
-| Column | Description | Example |
-|--------|-------------|----------|
-| `Game` | Game identifier | "Lakers vs Warriors" |
-| `Model Win Percentage` | Your model's win probability | 68 (or 0.68) |
-| `Model Margin` | Predicted margin (optional) | 3.5 |
-| `Contract Price` | Sportsbook price per unit | 0.45 |
+- **99% coverage** on Excel processing and allocation
+- **95% overall coverage** across the entire codebase
+- **Property-based testing** using Hypothesis for mathematical validation
+- Tests include: mathematical accuracy, Wharton compliance, edge cases, error handling, performance benchmarks
 
 ## 🔧 How It Works
 
 ### Core Algorithm
 
-1. **Expected Value Calculation**: `EV = (Win_Probability × (1/Contract_Price)) - 1`
+1. **Expected Value Calculation**: $EV = (p \times \frac{1}{\text{Contract Price}}) - 1$
 2. **Wharton Filter**: Only bet if EV ≥ 10% (academic research requirement)
 3. **Kelly Sizing**: Calculate optimal bet size using Kelly Criterion
 4. **Half-Kelly Safety**: Use 50% of Kelly for reduced volatility
@@ -226,7 +217,7 @@ Yankees vs Red Sox: $15.00 (EV: 12.4%)
 - `src/main.py` - Interactive CLI interface
 - `config/settings.py` - Configuration constants and directory setup
 - `run.py` - Main application entry point
-- `tests/` - Comprehensive test suite with 47 tests
+- `tests/` - Comprehensive test suite with 102 tests including property-based validation
 
 ### Configuration
 

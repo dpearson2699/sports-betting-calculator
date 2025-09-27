@@ -11,7 +11,7 @@ This is an **academic research-based event contract betting framework** implemen
 3. **`src/betting_framework.py`** - Core algorithmic engine implementing Wharton methodology with Kelly Criterion
 4. **`src/excel_processor.py`** - Batch processing with sophisticated bankroll allocation and priority logic
 5. **`config/settings.py`** - Configuration constants, directory auto-creation, and framework constraints
-6. **`tests/`** - Comprehensive test suite (47+ tests) with fixtures and builders in `conftest.py`
+6. **`tests/`** - Comprehensive test suite (102 tests) with unit, integration, and property-based tests
 
 **Data Flow**: Input → EV calculation → Wharton filtering (10% threshold) → Kelly sizing → Half-Kelly safety → 15% bankroll cap → Whole contract adjustment → Commission handling → Bankroll allocation → Output
 
@@ -79,20 +79,21 @@ uv pip install -e .              # Enable proper package imports
 python run.py                     # PREFERRED entry point
 uv run sports-betting-calculator  # Alternative using package script
 
-# Test suite (47 comprehensive tests achieving 60% overall coverage)
+# Test suite (102 comprehensive tests with property-based validation)
 uv run pytest                     # All tests with coverage report  
 uv run pytest tests/unit/         # Unit tests only
 uv run pytest tests/integration/  # Integration tests only  
+uv run pytest tests/property/     # Property-based tests using Hypothesis
 uv run pytest -m "not slow"       # Fast tests only (exclude @pytest.mark.slow)
 uv run pytest -v                  # Verbose output
 uv run pytest --no-cov            # Skip coverage reporting
 uv run pytest --cov-report=html   # Generate test-results/coverage/ directory
+uv run pytest --collect-only      # See all available tests without running
 
-# Alternative test commands (commonly used in project)
-python run_tests.py                # Full test suite (aliases to uv run pytest)
-python run_tests.py unit           # Unit tests only
-python run_tests.py integration    # Integration tests only
-python run_tests.py quick          # Fast tests only
+# Common test patterns for development
+uv run pytest -k "test_wharton"   # Run Wharton methodology tests
+uv run pytest -k "test_kelly"     # Run Kelly Criterion tests
+uv run pytest -m "mathematical"   # Run mathematical accuracy tests
 
 # Examples and validation (after development install)
 python examples/basic_usage.py         # Demonstrate single bet patterns
@@ -121,11 +122,12 @@ python examples/excel_batch_example.py # Show batch processing workflow
 - **Excel comments**: Headers include explanatory comments for user guidance via `COLUMN_CONFIG`
 
 ### Test Infrastructure
-- **Test Organization**: `tests/unit/` and `tests/integration/` with shared fixtures in `conftest.py`
+- **Test Organization**: `tests/unit/`, `tests/integration/`, and `tests/property/` with shared fixtures in `conftest.py`
 - **Fixtures**: Comprehensive test data including `wharton_test_cases`, `edge_case_test_data`, `sample_excel_data`
-- **Markers**: `@pytest.mark.unit`, `@pytest.mark.integration`, `@pytest.mark.excel`, `@pytest.mark.slow`
+- **Markers**: `@pytest.mark.unit`, `@pytest.mark.integration`, `@pytest.mark.excel`, `@pytest.mark.slow`, `@pytest.mark.property`, `@pytest.mark.mathematical`
+- **Property-Based Testing**: Uses Hypothesis for mathematical validation and edge case discovery
 - **Test Builder**: `TestDataBuilder` class in conftest.py for dynamic test data creation
-- **Coverage**: High coverage on core betting logic and Excel processing with detailed HTML reports
+- **Coverage**: HTML reports generated in `test-results/coverage/` directory
 
 ## Critical Implementation Details
 
@@ -173,12 +175,13 @@ actual_bet_amount = whole_contracts * contract_price
 
 ## Testing Approach
 
-**Comprehensive pytest test suite** with exactly 47 tests achieving high coverage:
-- **Unit tests**: `tests/unit/` for individual component testing (covering `test_betting_framework.py`, `test_excel_processor.py`)
+**Comprehensive pytest test suite** with exactly 102 tests achieving high coverage:
+- **Unit tests**: `tests/unit/` for individual component testing (covering `test_betting_framework.py`, `test_excel_processor.py`, `test_main.py`, `test_missing_coverage.py`)
 - **Integration tests**: `tests/integration/` for end-to-end workflows (`test_end_to_end.py`)  
+- **Property-based tests**: `tests/property/` using Hypothesis for mathematical validation and edge case discovery
 - **Fixtures**: `tests/conftest.py` provides `wharton_test_cases`, `sample_excel_data`, `edge_case_test_data`
-- **Test runners**: Use `uv run pytest` or `python run_tests.py` (project-specific aliases)
-- **Coverage**: 97% on core betting logic (`src/betting_framework.py`), 92% on Excel processing (`src/excel_processor.py`), 60% overall
+- **Test runners**: Use `uv run pytest` (primary method)
+- **Coverage**: 97% on core betting logic (`src/betting_framework.py`), 99% on Excel processing (`src/excel_processor.py`), 95% overall
 
 **Manual validation pattern** for quick verification:
 1. Single bet mode with Weekly bankroll: 100, Win %: 68, Contract price: 0.45 (should result in BET)
