@@ -14,22 +14,22 @@ Thank you for your interest in contributing to the Sports Betting Calculator! Th
 
 1. Fork and clone the repository:
 
-```bash
-git clone https://github.com/your-username/sports-betting-calculator.git
-cd sports-betting-calculator
-```
+   ```bash
+   git clone https://github.com/your-username/sports-betting-calculator.git
+   cd sports-betting-calculator
+   ```
 
 2. Install dependencies:
 
-```bash
-uv sync --extra all
-```
+   ```bash
+   uv sync --extra all
+   ```
 
 3. Run tests to ensure everything works:
 
-```bash
-uv run pytest
-```
+   ```bash
+   uv run pytest
+   ```
 
 ## Development Workflow
 
