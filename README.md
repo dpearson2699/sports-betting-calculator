@@ -1,7 +1,7 @@
 # Sports Betting Calculator: Find Mispriced Event Contracts Using Kelly Criterion
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![Coverage](https://img.shields.io/badge/coverage-95%25-green.svg)](#-testing--development)
+[![Coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/dpearson2699/sports-betting-calculator/master/coverage-badge.json)](#-testing--development)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A professional sports betting framework based on academic research, implementing the Kelly Criterion with safety constraints for optimal bankroll management.
@@ -29,6 +29,8 @@ cd sports-betting-calculator
 # Install dependencies with uv
 uv sync
 ```
+
+> ℹ️ **uv-only workflow**: This project intentionally manages dependencies exclusively with `uv`. The checked-in virtual environment does not ship with `pip`, so stick with `uv sync`, `uv run`, and related commands—no manual `pip install` steps required.
 
 ### Usage
 
@@ -145,6 +147,7 @@ uv run pytest --cov=src --cov-report=html
 - **99% coverage** on Excel processing and allocation
 - **95% overall coverage** across the entire codebase
 - **Property-based testing** using Hypothesis for mathematical validation
+- README coverage badge updates automatically after every push to `master` via `.github/workflows/coverage-badge.yml`, which regenerates `coverage-badge.json` from the latest pytest run.
 - Tests include: mathematical accuracy, Wharton compliance, edge cases, error handling, performance benchmarks
 
 ## 🔧 How It Works
