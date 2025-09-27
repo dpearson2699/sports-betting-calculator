@@ -79,14 +79,20 @@ uv pip install -e .              # Enable proper package imports
 python run.py                     # PREFERRED entry point
 uv run sports-betting-calculator  # Alternative using package script
 
-# Test suite (60 comprehensive tests achieving 97%+ coverage)
-uv run pytest                     # All tests with coverage report
+# Test suite (47 comprehensive tests achieving 60% overall coverage)
+uv run pytest                     # All tests with coverage report  
 uv run pytest tests/unit/         # Unit tests only
 uv run pytest tests/integration/  # Integration tests only  
 uv run pytest -m "not slow"       # Fast tests only (exclude @pytest.mark.slow)
 uv run pytest -v                  # Verbose output
 uv run pytest --no-cov            # Skip coverage reporting
 uv run pytest --cov-report=html   # Generate test-results/coverage/ directory
+
+# Alternative test commands (commonly used in project)
+python run_tests.py                # Full test suite (aliases to uv run pytest)
+python run_tests.py unit           # Unit tests only
+python run_tests.py integration    # Integration tests only
+python run_tests.py quick          # Fast tests only
 
 # Examples and validation (after development install)
 python examples/basic_usage.py         # Demonstrate single bet patterns
@@ -167,12 +173,12 @@ actual_bet_amount = whole_contracts * contract_price
 
 ## Testing Approach
 
-**Comprehensive pytest test suite** with 47+ tests achieving high coverage:
-- **Unit tests**: `tests/unit/` for individual component testing
-- **Integration tests**: `tests/integration/` for end-to-end workflows  
+**Comprehensive pytest test suite** with exactly 47 tests achieving high coverage:
+- **Unit tests**: `tests/unit/` for individual component testing (covering `test_betting_framework.py`, `test_excel_processor.py`)
+- **Integration tests**: `tests/integration/` for end-to-end workflows (`test_end_to_end.py`)  
 - **Fixtures**: `tests/conftest.py` provides `wharton_test_cases`, `sample_excel_data`, `edge_case_test_data`
-- **Test runners**: Use standard `uv run pytest` commands with built-in options
-- **Coverage**: 97% on core betting logic, 93% on Excel processing
+- **Test runners**: Use `uv run pytest` or `python run_tests.py` (project-specific aliases)
+- **Coverage**: 97% on core betting logic (`src/betting_framework.py`), 92% on Excel processing (`src/excel_processor.py`), 60% overall
 
 **Manual validation pattern** for quick verification:
 1. Single bet mode with Weekly bankroll: 100, Win %: 68, Contract price: 0.45 (should result in BET)
