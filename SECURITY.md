@@ -8,7 +8,7 @@
 
 ## Reporting a Vulnerability
 
-The Event Contract Betting Framework maintainer takes security seriously. If you discover a security vulnerability, please report it responsibly.
+The Sports Betting Calculator maintainer takes security seriously. If you discover a security vulnerability, please report it responsibly.
 
 ### How to Report
 
