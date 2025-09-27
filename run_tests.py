@@ -32,7 +32,7 @@ def run_tests(test_type="all", verbose=False, coverage=True):
         cmd.extend([
             "--cov=src", 
             "--cov-report=term-missing",
-            "--cov-report=html:htmlcov"
+            "--cov-report=html:test-results/coverage"
         ])
     
     # Add markers for organized output
@@ -62,8 +62,8 @@ def run_with_coverage():
         "tests",
         "--cov=src",
         "--cov-report=term-missing", 
-        "--cov-report=html:htmlcov",
-        "--cov-report=xml",
+        "--cov-report=html:test-results/coverage",
+        "--cov-report=xml:test-results/coverage.xml",
         "-v"
     ]
     print(f"Running with coverage: {' '.join(cmd)}")
