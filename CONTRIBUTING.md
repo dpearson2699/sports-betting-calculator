@@ -1,12 +1,12 @@
-# Contributing to Event Contract Betting Framework
+# Contributing to Sports Betting Calculator
 
-Thank you for your interest in contributing to the Event Contract Betting Framework! This document provides guidelines for contributing to this project.
+Thank you for your interest in contributing to the Sports Betting Calculator! This document provides guidelines for contributing to this project.
 
 ## Getting Started
 
 ### Prerequisites
 
-- Python 3.11 or higher
+- Python 3.13 or higher
 - [uv](https://github.com/astral-sh/uv) package manager (recommended)
 - Basic understanding of sports betting and Kelly Criterion
 
@@ -15,20 +15,20 @@ Thank you for your interest in contributing to the Event Contract Betting Framew
 1. Fork and clone the repository:
 
 ```bash
-git clone https://github.com/your-username/betting-framework.git
-cd betting-framework
+git clone https://github.com/<your-username>/sports-betting-calculator.git
+cd sports-betting-calculator
 ```
 
-2. Install dependencies:
+2. Install dependencies (installs the base package plus the dev/test extras):
 
 ```bash
-uv sync
+uv sync --extra all
 ```
 
-3. Run tests to ensure everything works:
+3. Run the full test suite to ensure everything works locally:
 
 ```bash
-python run_tests.py
+uv run pytest
 ```
 
 ## Development Workflow
@@ -37,15 +37,15 @@ python run_tests.py
 
 ```bash
 # Run all tests with coverage
-python run_tests.py
+uv run pytest --cov=src --cov-report=term-missing
 
 # Run specific test types
-python run_tests.py unit          # Unit tests only
-python run_tests.py integration   # Integration tests only
-python run_tests.py quick         # Fast tests only
+uv run pytest tests/unit/         # Unit tests only
+uv run pytest tests/integration/  # Integration tests only
+uv run pytest -m "not slow"       # Fast feedback suite
 
 # Generate HTML coverage report
-uv run pytest --cov=src --cov-report=html
+uv run pytest --cov=src --cov-report=html:test-results/coverage
 ```
 
 ### Code Style

@@ -7,7 +7,7 @@ name = "sports-betting-calculator"
 version = "0.1.0"
 description = "Find mispriced event contracts and optimize betting strategies using Kelly Criterion and academic research"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.13"
 license = {text = "MIT"}
 authors = [
     {name = "Derek Pearson"},
@@ -16,10 +16,14 @@ dependencies = [
     "openpyxl>=3.1.5",
     "pandas>=2.3.2",
 ]
-
-[tool.hatch.build.targets.wheel]
-packages = ["src", "config"]
-keywords = ["betting", "kelly-criterion", "event-contracts", "academic-research", "finance", "risk-management"]
+keywords = [
+    "betting",
+    "kelly-criterion",
+    "event-contracts",
+    "academic-research",
+    "finance",
+    "risk-management",
+]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Education",
@@ -27,21 +31,19 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Office/Business :: Financial",
     "Topic :: Scientific/Engineering :: Mathematics",
 ]
-dependencies = [
-    "openpyxl>=3.1.5",
-    "pandas>=2.3.2",
-]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src", "config"]
 
 [project.urls]
-"Homepage" = "https://github.com/USERNAME/betting-framework"
-"Bug Reports" = "https://github.com/USERNAME/betting-framework/issues"
-"Source" = "https://github.com/USERNAME/betting-framework"
-"Documentation" = "https://github.com/USERNAME/betting-framework#readme"
+"Homepage" = "https://github.com/dpearson2699/sports-betting-calculator"
+"Bug Reports" = "https://github.com/dpearson2699/sports-betting-calculator/issues"
+"Source" = "https://github.com/dpearson2699/sports-betting-calculator"
+"Documentation" = "https://github.com/dpearson2699/sports-betting-calculator#readme"
 
 [project.optional-dependencies]
 test = [
@@ -129,7 +131,7 @@ exclude_lines = [
 
 [tool.black]
 line-length = 88
-target-version = ['py311']
+target-version = ['py313']
 include = '\.pyi?$'
 extend-exclude = '''
 /(

@@ -1,6 +1,6 @@
 # Sports Betting Calculator: Find Mispriced Event Contracts Using Kelly Criterion
 
-[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.13+](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/downloads/)
 [![Coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/dpearson2699/sports-betting-calculator/master/coverage-badge.json)](#-testing--development)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -20,42 +20,54 @@ A professional sports betting framework based on academic research, implementing
 
 ## 🚀 Quick Start
 
-### Installation
+Pick the track that matches your experience:
+
+- **Already set up with Python 3.13+ and `uv`?** Jump straight to the commands in [Fast path](#fast-path).
+- **Need a refresher or starting from scratch?** Follow the [Full setup](#full-setup) checklist.
+
+### Fast path
 
 ```bash
-# Clone or download this project
-cd sports-betting-calculator
-
-# Install dependencies with uv
 uv sync
+uv run python run.py
 ```
 
-> ℹ️ **uv-only workflow**: This project intentionally manages dependencies exclusively with `uv`. The checked-in virtual environment does not ship with `pip`, so stick with `uv sync`, `uv run`, and related commands—no manual `pip install` steps required.
+The menu offers Excel batch processing (option 1), single-bet analysis (option 2), and exit (option 3). Excel runs write results to `data/output/` with “_RESULTS” in the filename.
 
-### Usage
+### Full setup
 
-#### Running the Application
+1. **Install Python 3.13+**
+   - Using `uv`: If you already have `uv` available, run `uv python install 3.13` to download and manage a Python interpreter specifically for this project.
+   - Windows: Download the latest 3.13 release from the [Python download page](https://www.python.org/downloads/), run the installer, and select **Add python.exe to PATH** before clicking *Install Now*.
+   - macOS: Download the macOS installer from the same page, open the `.pkg`, and follow the prompts.
+   If you're unsure which version you have, reinstalling 3.13 is the simplest path.
 
-```bash
-# Recommended method
-python run.py
+2. **Install `uv`**
+   - `uv` manages virtual environments and dependencies for this project. Follow the instructions for your operating system in the [official installation guide](https://docs.astral.sh/uv/getting-started/installation/), then restart your terminal so the new command is available.
 
-# Alternative methods
-uv run sports-betting-calculator  # Using script entry point
-uv run run.py                     # Using uv directly
-```
+3. **Get the project files**
+   - Developers comfortable with Git can clone the repository: `git clone https://github.com/dpearson2699/sports-betting-calculator.git`
+   - Otherwise, download the ZIP from GitHub (green **Code** button → **Download ZIP**) and extract it. The extracted folder should be named `sports-betting-calculator`.
 
-#### Interactive Mode (Single Bet)
+4. **Open a terminal in the project directory**
+   - Windows: In File Explorer, open the project folder, click the address bar, type `powershell`, and press Enter.
+   - macOS: In Finder, right-click the folder and choose **New Terminal at Folder** (or open Terminal and `cd` to the folder).
 
-Choose option 1 for single bet analysis
+5. **Install the dependencies**
 
-#### Excel Batch Mode (Multiple Games)
+   ```bash
+   uv sync
+   ```
 
-Choose option 2 for batch processing. The application will:
+   `uv` creates an isolated environment and downloads the required packages. The first run may take a couple of minutes; later runs are fast.
 
-1. Show available Excel files in `data/input/` directory
-2. Let you select a file or create a sample
-3. Process the selected file and save results to `data/output/`
+6. **Launch the calculator**
+
+   ```bash
+   uv run python run.py
+   ```
+
+   Choose the workflow you need from the on-screen menu and follow the prompts. Excel batch runs save their output to `data/output/`.
 
 ### 📊 Excel File Format
 
@@ -226,7 +238,7 @@ Edit `config/settings.py` to modify:
 
 ## ⚙️ Requirements
 
-- Python 3.11+
+- Python 3.13+
 - pandas ≥ 2.3.2
 - openpyxl ≥ 3.1.5
 - pytest ≥ 8.0.0 (for testing)
@@ -279,7 +291,7 @@ The methodology is primarily based on:
 #### Tests failing
 
 - Run: `uv run pytest -v` to see detailed test output
-- Check: Python version (requires 3.11+) and dependencies (`uv sync`)
+- Check: Python version (requires 3.13+) and dependencies (`uv sync`)
 
 ### Getting Help
 
