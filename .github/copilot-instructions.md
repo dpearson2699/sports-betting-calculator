@@ -1,20 +1,25 @@
-# Copilot Instructions for Wharton Betting Framework
+# Copilot Instructions for Sports Betting Calculator Framework
 
 ## Project Architecture
 
-This is a **Wharton-optimized sports betting framework** implementing Kelly Criterion with academic-backed safety constraints. The codebase prioritizes mathematical rigor and risk management over general flexibility.
+This is an **academic research-based event contract betting framework** implementing Kelly Criterion with empirically-validated safety constraints. The codebase prioritizes mathematical rigor and risk management over general flexibility, with algorithms informed by comprehensive academic research (see `mathematical-foundation.md`).
 
 ### Core Components & Data Flow
 
-1. **`run.py`** - Main entry point that sets up Python path and launches application
-2. **`src/main.py`** - CLI interface with two modes (single bet vs Excel batch)
-3. **`src/betting_framework.py`** - Core algorithmic engine implementing Wharton methodology
-4. **`src/excel_processor.py`** - Batch processing with bankroll allocation logic
-5. **`config/settings.py`** - Configuration constants and directory setup
+1. **`run.py`** - Main entry point that sets up Python path and launches application (PREFERRED entry point)
+2. **`src/main.py`** - CLI interface with numbered menu system (Excel batch vs single bet interactive)
+3. **`src/betting_framework.py`** - Core algorithmic engine implementing Wharton methodology with Kelly Criterion
+4. **`src/excel_processor.py`** - Batch processing with sophisticated bankroll allocation and priority logic
+5. **`config/settings.py`** - Configuration constants, directory auto-creation, and framework constraints
+6. **`tests/`** - Comprehensive test suite (47+ tests) with fixtures and builders in `conftest.py`
 
-Data flows: Input → EV calculation → Wharton filtering → Kelly sizing → Whole contract adjustment → Safety constraints → Output
+**Data Flow**: Input → EV calculation → Wharton filtering (10% threshold) → Kelly sizing → Half-Kelly safety → 15% bankroll cap → Whole contract adjustment → Commission handling → Bankroll allocation → Output
 
-**Key architectural decision**: Uses `sys.path.insert(0, str(PROJECT_ROOT / "src"))` for module imports due to `src/` structure without making it a package.
+**Key architectural decisions**: 
+- Uses standard Python package structure with proper `__init__.py` exports and relative imports
+- Auto-creates `data/input/` and `data/output/` directories on startup via `settings.py`
+- `uv` package manager preferred over `pip` for dependency management
+- Supports development installation via `uv pip install -e .` for proper IDE integration
 
 ### Critical Business Rules
 
@@ -62,25 +67,35 @@ Excel operations follow this flow:
 ## Development Commands
 
 ```powershell
-# Setup
-uv sync
+# Setup (uses uv package manager - preferred over pip)
+uv sync                           # Install all dependencies
+uv sync --extra test              # Include test dependencies
+uv sync --extra dev               # Include development tools
 
-# Run application (PREFERRED - use this entry point)
-python run.py
-# Alternative (direct source)
-uv run src/main.py
+# Install in development mode (required for proper imports)
+uv pip install -e .              # Enable proper package imports
 
-# Test suite (47 comprehensive tests with 93% coverage)
-python run_tests.py               # All tests with coverage
-python run_tests.py unit          # Unit tests only  
-python run_tests.py integration   # Integration tests only
-python run_tests.py quick         # Fast tests only (exclude slow)
+# Run application 
+python run.py                     # PREFERRED entry point
+uv run sports-betting-calculator  # Alternative using package script
+
+# Test suite (47+ comprehensive tests achieving 93%+ coverage)
+python run_tests.py               # All tests with coverage report
+python run_tests.py unit          # Unit tests only (tests/unit/)
+python run_tests.py integration   # Integration tests only (tests/integration/)  
+python run_tests.py quick         # Fast tests only (exclude @pytest.mark.slow)
+python run_tests.py -v            # Verbose output
+python run_tests.py --no-cov      # Skip coverage reporting
 uv run pytest -v                  # Direct pytest with verbose output
-uv run pytest --cov=src --cov-report=html  # Generate HTML coverage report
+uv run pytest --cov=src --cov-report=html  # Generate htmlcov/ directory
 
-# Manual testing patterns for validation
-# Single bet mode: Weekly bankroll: 100, Win %: 68, Contract price: 0.45
-# Batch mode: Use bankroll: 50 with auto-generated sample file
+# Examples and validation (after development install)
+python examples/basic_usage.py         # Demonstrate single bet patterns
+python examples/excel_batch_example.py # Show batch processing workflow
+
+# Manual testing validation patterns
+# Single bet mode: Weekly bankroll: 100, Win %: 68, Contract price: 0.45 (should result in BET)
+# Batch mode: Use bankroll: 100 with auto-generated sample file (tests allocation logic)
 ```
 
 ## Integration Points
@@ -93,18 +108,19 @@ uv run pytest --cov=src --cov-report=html  # Generate HTML coverage report
 
 ### File I/O Conventions
 - **Directory Structure**: `data/input/` for Excel files, `data/output/` for results
-- **Input Excel**: Sheet name defaults to `'Games'` (configurable in `settings.py`)
+- **Input Excel**: Sheet name defaults to `'Games'` (configurable via `DEFAULT_SHEET_NAME` in `settings.py`)
 - **Required columns**: `Game`, `Model Win Percentage`, `Contract Price` (optional: `Model Margin`)
 - **Output Excel**: Original filename + `_RESULTS.xlsx` in `data/output/`
-- **Sample generation**: Creates `sample_games.xlsx` in `data/input/` directory
+- **Sample generation**: Creates `sample_games.xlsx` in `data/input/` directory when no files found
 - **Auto-created directories**: `INPUT_DIR` and `OUTPUT_DIR` created on startup via `settings.py`
-- **Excel comments**: Headers include explanatory comments for user guidance
+- **Excel comments**: Headers include explanatory comments for user guidance via `COLUMN_CONFIG`
 
 ### Test Infrastructure
 - **Test Organization**: `tests/unit/` and `tests/integration/` with shared fixtures in `conftest.py`
 - **Fixtures**: Comprehensive test data including `wharton_test_cases`, `edge_case_test_data`, `sample_excel_data`
 - **Markers**: `@pytest.mark.unit`, `@pytest.mark.integration`, `@pytest.mark.excel`, `@pytest.mark.slow`
-- **Coverage**: 47 tests achieving 97% coverage on core betting logic, 93% on Excel processing
+- **Test Builder**: `TestDataBuilder` class in conftest.py for dynamic test data creation
+- **Coverage**: High coverage on core betting logic and Excel processing with detailed HTML reports
 
 ## Critical Implementation Details
 
@@ -152,7 +168,7 @@ actual_bet_amount = whole_contracts * contract_price
 
 ## Testing Approach
 
-**Comprehensive pytest test suite** with 47 tests achieving high coverage:
+**Comprehensive pytest test suite** with 47+ tests achieving high coverage:
 - **Unit tests**: `tests/unit/` for individual component testing
 - **Integration tests**: `tests/integration/` for end-to-end workflows  
 - **Fixtures**: `tests/conftest.py` provides `wharton_test_cases`, `sample_excel_data`, `edge_case_test_data`
@@ -173,4 +189,27 @@ actual_bet_amount = whole_contracts * contract_price
 - `MAX_BET_PERCENTAGE = 0.15` - Hard bankroll cap per bet
 - `MIN_BANKROLL_FOR_PARTIAL = 0.01` - Minimum for partial bankroll allocation
 
-**Path handling**: All imports use `sys.path.insert()` for cross-module imports due to `src/` structure
+**Path handling**: All imports use standard Python package structure with relative imports within packages
+
+## CLI Interface Patterns
+
+### Main Menu System
+The application uses a simple numbered menu system in `main()`:
+- Option 1: Excel Batch Processing (prioritized for multiple games)
+- Option 2: Single Bet Analysis (interactive mode)
+- Option 3: Exit
+
+### File Selection Logic
+Excel batch mode implements sophisticated file handling:
+```python
+# Lists available files in data/input/
+available_files = list_available_input_files()
+# Offers sample creation if no files found
+# Supports custom file path input as fallback
+```
+
+### Input Validation Patterns
+Consistent `try/except ValueError` blocks for all user inputs with specific error messages for guidance.
+
+### IDE Configuration
+**VS Code Python Path Resolution**: The project includes `.vscode/settings.json` with `"python.analysis.extraPaths": ["./src"]` to help Pylance resolve imports correctly. After installing with `uv pip install -e .`, full intellisense and navigation work properly with the standard package structure.

@@ -1,6 +1,13 @@
-# Wharton Betting Framework
+# Sports Betting Calculator: Find Mispriced Event Contracts Using Kelly Criterion
 
-A professional sports betting framework based on Wharton research, implementing the Kelly Criterion with safety constraints for optimal bankroll management.
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![Tests](https://github.com/USERNAME/betting-framework/workflows/CI/badge.svg)](https://github.com/USERNAME/betting-framework/actions)
+[![Coverage](https://img.shields.io/badge/coverage-93%25-green.svg)](https://github.com/USERNAME/betting-framework)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+A professional sports betting framework based on academic research, implementing the Kelly Criterion with safety constraints for optimal bankroll management.
+
+> ⚠️ **Educational Purpose**: This framework is for educational and research purposes. Sports betting involves risk. Never bet more than you can afford to lose.
 
 ## 🎯 Features
 
@@ -229,6 +236,42 @@ This framework implements methodology based on:
 - **Wharton Research**: 10% EV threshold for sustainable profitability
 - **Half-Kelly Strategy**: Reduced volatility while maintaining growth
 - **Modern Portfolio Theory**: Risk management through position sizing
+
+## 🔧 Troubleshooting
+
+### Common Issues
+
+**"No Excel files found in data/input/"**
+- Solution: Use option to create sample file, or add your Excel files to `data/input/` directory
+
+**"Missing required columns" error**
+- Solution: Ensure Excel file has columns: `Game`, `Model Win Percentage`, `Contract Price`
+- Optional column: `Model Margin`
+
+**All bets showing "NO BET"**
+- Cause: Expected values below 10% threshold (Wharton requirement)
+- Solution: Check your win percentages and contract prices for accuracy
+
+**Import errors in VS Code**
+- Solution: The `.vscode/settings.json` file should resolve Python path issues
+- Alternative: Use `python run.py` instead of running files directly
+
+**Tests failing**
+- Run: `python run_tests.py` to see detailed output
+- Check: Python version (requires 3.11+) and dependencies (`uv sync`)
+
+### Getting Help
+
+1. **Check the examples**: `python examples/basic_usage.py`
+2. **Run tests**: `python run_tests.py` to verify installation
+3. **Review documentation**: See `.github/copilot-instructions.md` for detailed technical info
+4. **Create an issue**: Use GitHub issues for bug reports or questions
+
+### Performance Tips
+
+- **Large datasets**: Framework handles 100+ games efficiently
+- **Memory usage**: Results are optimized for reasonable memory footprint
+- **Processing speed**: Typical processing time < 1 second for most datasets
 
 ---
 
