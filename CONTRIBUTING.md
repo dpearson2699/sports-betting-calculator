@@ -1,12 +1,12 @@
-# Contributing to Event Contract Betting Framework
+# Contributing to Sports Betting Calculator
 
-Thank you for your interest in contributing to the Event Contract Betting Framework! This document provides guidelines for contributing to this project.
+Thank you for your interest in contributing to the Sports Betting Calculator! This document provides guidelines for contributing to this project.
 
 ## Getting Started
 
 ### Prerequisites
 
-- Python 3.11 or higher
+- Python 3.13 or higher
 - [uv](https://github.com/astral-sh/uv) package manager (recommended)
 - Basic understanding of sports betting and Kelly Criterion
 
@@ -15,20 +15,20 @@ Thank you for your interest in contributing to the Event Contract Betting Framew
 1. Fork and clone the repository:
 
 ```bash
-git clone https://github.com/your-username/betting-framework.git
-cd betting-framework
+git clone https://github.com/your-username/sports-betting-calculator.git
+cd sports-betting-calculator
 ```
 
 2. Install dependencies:
 
 ```bash
-uv sync
+uv sync --extra all
 ```
 
 3. Run tests to ensure everything works:
 
 ```bash
-python run_tests.py
+uv run pytest
 ```
 
 ## Development Workflow
@@ -37,12 +37,12 @@ python run_tests.py
 
 ```bash
 # Run all tests with coverage
-python run_tests.py
+uv run pytest
 
 # Run specific test types
-python run_tests.py unit          # Unit tests only
-python run_tests.py integration   # Integration tests only
-python run_tests.py quick         # Fast tests only
+uv run pytest tests/unit/          # Unit tests only
+uv run pytest tests/integration/   # Integration tests only
+uv run pytest -m "not slow"        # Fast tests only
 
 # Generate HTML coverage report
 uv run pytest --cov=src --cov-report=html
@@ -54,6 +54,22 @@ uv run pytest --cov=src --cov-report=html
 - Use descriptive variable names
 - Add docstrings to all public functions
 - Keep functions focused and single-purpose
+
+Use these commands to maintain code quality:
+
+```bash
+# Format code with Black
+uv run black .
+
+# Check style with flake8
+uv run flake8
+
+# Security check with bandit
+uv run bandit -r src/
+
+# Check dependencies for vulnerabilities
+uv run safety check
+```
 
 ### Testing Requirements
 
