@@ -24,7 +24,7 @@ A professional sports betting framework based on academic research, implementing
 
 ```bash
 # Clone or download this project
-cd betting-framework
+cd sports-betting-calculator
 
 # Install dependencies with uv
 uv sync
