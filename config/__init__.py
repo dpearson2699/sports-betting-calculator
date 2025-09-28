@@ -22,7 +22,14 @@ from .settings import (
     MAX_BET_PERCENTAGE,
     MIN_BANKROLL_FOR_PARTIAL,
     
-    # Robinhood commission
+    # Commission configuration
+    DEFAULT_COMMISSION_RATE,
+    CURRENT_COMMISSION_RATE,
+    CURRENT_PLATFORM,
+    PLATFORM_COMMISSION_RATES,
+    get_commission_rate,
+    
+    # Backward compatibility
     COMMISSION_PER_CONTRACT,
     
     # Excel formatting
@@ -41,6 +48,11 @@ __all__ = [
     "HALF_KELLY_MULTIPLIER", 
     "MAX_BET_PERCENTAGE",
     "MIN_BANKROLL_FOR_PARTIAL",
+    "DEFAULT_COMMISSION_RATE",
+    "CURRENT_COMMISSION_RATE",
+    "CURRENT_PLATFORM",
+    "PLATFORM_COMMISSION_RATES",
+    "get_commission_rate",
     "COMMISSION_PER_CONTRACT",
     "MAX_COLUMN_WIDTH",
     "COLUMN_PADDING",
