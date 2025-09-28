@@ -1,9 +1,0 @@
-Defaulting to user installation because normal site-packages is not writeable
-Collecting black
-  Downloading black-25.9.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_28_x86_64.whl.metadata
-     - 83.5 kB 252.2 MB/s 0:00:00
-Requirement already satisfied: click>=8.0.0 in /usr/lib/python3/dist-packages (from black) (8.1.6)
-Collecting mypy-extensions>=0.4.3 (from black)
-  Downloading mypy_extensions-1.1.0-py3-none-any.whl.metadata
-     - 1.1 kB ? 0:00:00
-Requirement already satisfied: packaging>=22.0 in /usr/lib/python3/dist-packages (from black) (24.0)
