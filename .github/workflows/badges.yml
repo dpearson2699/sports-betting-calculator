@@ -1,4 +1,4 @@
-name: coverage-badge
+name: badges
 
 on:
   push:
