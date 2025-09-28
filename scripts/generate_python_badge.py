@@ -27,7 +27,7 @@ from pathlib import Path
 import tomllib
 
 DEFAULT_PYPROJECT = Path("pyproject.toml")
-DEFAULT_OUTPUT = Path("python-badge.json")
+DEFAULT_OUTPUT = Path(".github/badges/python-badge.json")
 
 
 def parse_args() -> argparse.Namespace:
@@ -44,7 +44,7 @@ def parse_args() -> argparse.Namespace:
         "-o",
         type=Path,
         default=DEFAULT_OUTPUT,
-        help="Path to write Shields.io endpoint JSON (default: python-badge.json)",
+        help="Path to write Shields.io endpoint JSON (default: .github/badges/python-badge.json)",
     )
     parser.add_argument(
         "--label",
