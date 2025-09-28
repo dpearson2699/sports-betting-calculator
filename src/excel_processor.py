@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 
 from .betting_framework import user_input_betting_framework
+from .commission_manager import commission_manager
 from config import (
     INPUT_DIR, 
     OUTPUT_DIR, 
@@ -13,12 +14,25 @@ from config import (
     COMMISSION_PER_CONTRACT
 )
 
+def get_dynamic_explanation(column_name, base_explanation):
+    """Generate dynamic explanations that include current commission rate."""
+    if column_name in ['Adjusted Price', 'Contract Cost']:
+        commission_rate = commission_manager.get_commission_rate()
+        # Replace both patterns
+        explanation = base_explanation
+        if 'contract price + commission' in explanation:
+            explanation = explanation.replace('contract price + commission', f'contract price + ${commission_rate:.2f}')
+        if '$0.02 commission' in explanation:
+            explanation = explanation.replace('$0.02 commission', f'${commission_rate:.2f} commission')
+        return explanation
+    return base_explanation
+
 # Centralized column configuration
 COLUMN_CONFIG = {
     # Internal input columns (used for Excel reading and validation)
     'Game': {
         'explanation': 'The game or matchup being analyzed (e.g., "Lakers vs Warriors")',
-        'format_type': None,
+        'format_type': 'text',
         'is_input': True
     },
     'Model Win Percentage': {
@@ -101,7 +115,7 @@ COLUMN_CONFIG = {
         'is_input': False
     },
     'Adjusted Price': {
-        'explanation': 'Total cost per contract including commission (contract price + $0.02)',
+        'explanation': 'Total cost per contract including commission (contract price + commission)',
         'format_type': 'currency',
         'is_input': False
     },
@@ -117,6 +131,16 @@ COLUMN_CONFIG = {
     },
     'Reason': {
         'explanation': 'Explanation for NO BET decisions (e.g., "EV below 10% threshold", "Negative Kelly")',
+        'format_type': None,
+        'is_input': False
+    },
+    'Commission Rate': {
+        'explanation': 'Commission rate per contract used in calculations (varies by trading platform)',
+        'format_type': 'currency',
+        'is_input': False
+    },
+    'Platform': {
+        'explanation': 'Trading platform used for commission rate calculation',
         'format_type': None,
         'is_input': False
     }
@@ -146,10 +170,14 @@ def get_required_input_columns():
 def apply_excel_formatting(worksheet, df, format_mapping=None):
     """Apply formatting to Excel worksheet based on column types."""
     from openpyxl.comments import Comment
-    from openpyxl.styles import Alignment
+    from openpyxl.styles import Alignment, PatternFill, Font
     
     # Use COLUMN_CONFIG if no custom mapping provided
     config = format_mapping or COLUMN_CONFIG
+    
+    # Define commission-related column highlighting
+    commission_highlight = PatternFill(start_color="FFF2CC", end_color="FFF2CC", fill_type="solid")  # Light yellow
+    commission_columns = ['Commission Rate', 'Platform', 'Adjusted Price', 'Contract Cost']
     
     for col_name, col_config in config.items():
         if col_name in df.columns:
@@ -164,17 +192,37 @@ def apply_excel_formatting(worksheet, df, format_mapping=None):
             elif format_type == 'currency':
                 for row in range(2, len(df) + 2):
                     worksheet[f"{col_letter}{row}"].number_format = '$0.00'
+            elif format_type == 'text':
+                for row in range(2, len(df) + 2):
+                    worksheet[f"{col_letter}{row}"].number_format = '@'
             
-            # Apply text alignment for specific columns (Quick View sheet)
-            if col_name in ['Final', 'Reason']:
-                for row in range(1, len(df) + 2):  # Include header row
+            # Highlight commission-related columns
+            if col_name in commission_columns:
+                # Highlight header with bold font and background
+                header_cell = worksheet[f"{col_letter}1"]
+                header_cell.fill = commission_highlight
+                header_cell.font = Font(bold=True)
+                
+                # Highlight data cells with background only
+                for row in range(2, len(df) + 2):
+                    worksheet[f"{col_letter}{row}"].fill = commission_highlight
+            
+            # Apply center alignment to ALL column headers
+            header_cell = worksheet[f"{col_letter}1"]
+            header_cell.alignment = Alignment(horizontal='center')
+            
+            # Apply right alignment to data cells for general type columns (format_type: None)
+            if col_config.get('format_type') is None:
+                for row in range(2, len(df) + 2):  # Start from row 2 (skip header)
                     cell = worksheet[f"{col_letter}{row}"]
                     cell.alignment = Alignment(horizontal='right')
             
             # Add explanatory comment to header
             if 'explanation' in col_config:
                 header_cell = worksheet[f"{col_letter}1"]
-                comment = Comment(col_config['explanation'], "Wharton Betting Framework")
+                # Use dynamic explanation that includes current commission rate
+                explanation = get_dynamic_explanation(col_name, col_config['explanation'])
+                comment = Comment(explanation, "Wharton Betting Framework")
                 comment.width = 300
                 comment.height = 100
                 header_cell.comment = comment
@@ -345,7 +393,7 @@ def process_betting_excel(excel_file_path, weekly_bankroll, sheet_name=DEFAULT_S
                 model_win_percentage=win_pct,
                 contract_price=contract_price,
                 model_win_margin=win_margin,
-                commission_per_contract=COMMISSION_PER_CONTRACT
+                commission_per_contract=commission_manager.get_commission_rate()
             )
             
             # Calculate Net Profit (what you win if bet hits, accounting for total cost)
@@ -356,6 +404,15 @@ def process_betting_excel(excel_file_path, weekly_bankroll, sheet_name=DEFAULT_S
                 total_cost = contracts * adjusted_price
                 payout_if_win = contracts * 1.0  # $1 per contract if win
                 net_profit = payout_if_win - total_cost
+            
+            # Enhance reason with commission impact details for Excel display
+            enhanced_reason = result.get('reason', '')
+            if result['decision'] == 'NO BET' and enhanced_reason:
+                # Add commission impact context to reasons when relevant
+                if 'commission_impact' in result and result['commission_impact'] > 0.5:
+                    enhanced_reason += f" [Commission impact: -{result['commission_impact']:.1f}% EV]"
+                elif 'commission_increase_pct' in result and result['commission_increase_pct'] > 5:
+                    enhanced_reason += f" [Commission adds {result['commission_increase_pct']:.0f}% to min bet]"
             
             # Store results using final column names directly
             result_row = {
@@ -372,9 +429,11 @@ def process_betting_excel(excel_file_path, weekly_bankroll, sheet_name=DEFAULT_S
                 'Adjusted Price': result.get('adjusted_price', 0),
                 'Target Bet Amount': result.get('target_bet_amount', result['bet_amount']),
                 'Unused Amount': result.get('unused_amount', 0),
-                'Reason': result.get('reason', ''),
+                'Reason': enhanced_reason,
                 'Final Recommendation': '',  # Will be filled by allocation logic
-                'Cumulative Bet Amount': 0.0   # Will be filled by allocation logic
+                'Cumulative Bet Amount': 0.0,   # Will be filled by allocation logic
+                'Commission Rate': commission_manager.get_commission_rate(),
+                'Platform': commission_manager.get_current_platform()
             }
             
             # Only add Margin column if we have margin data
@@ -444,7 +503,7 @@ def process_betting_excel(excel_file_path, weekly_bankroll, sheet_name=DEFAULT_S
             # Create format mapping for quick view columns with explanations
             quick_format_mapping = {
                 'Game': {
-                    'format_type': None,
+                    'format_type': 'text',
                     'explanation': 'The game or matchup being analyzed (e.g., "Lakers vs Warriors")'
                 },
                 'Win %': {
@@ -580,6 +639,27 @@ def display_summary(df, weekly_bankroll):
     print(f"Total Allocated: ${total_allocated:.2f}")
     print(f"Remaining Bankroll: ${weekly_bankroll - total_allocated:.2f}")
     print(f"Total Expected Profit: ${total_expected_profit:.2f}")
+    print("-" * 60)
+    print("COMMISSION IMPACT ANALYSIS:")
+    print(f"Platform: {commission_manager.get_current_platform()}")
+    print(f"Commission Rate: ${commission_manager.get_commission_rate():.2f} per contract")
+    
+    # Calculate total commission costs
+    total_contracts = df[df['Final Recommendation'] == 'BET']['Contracts To Buy'].sum()
+    total_commission_cost = total_contracts * commission_manager.get_commission_rate()
+    
+    if total_commission_cost > 0:
+        commission_pct_of_bets = (total_commission_cost / total_allocated) * 100 if total_allocated > 0 else 0
+        print(f"Total Contracts: {total_contracts}")
+        print(f"Total Commission Cost: ${total_commission_cost:.2f}")
+        print(f"Commission as % of Total Bets: {commission_pct_of_bets:.1f}%")
+        
+        # Show commission impact on profitability
+        profit_after_commission = total_expected_profit
+        profit_before_commission = profit_after_commission + total_commission_cost
+        if profit_before_commission > 0:
+            commission_impact_pct = (total_commission_cost / profit_before_commission) * 100
+            print(f"Commission reduces expected profit by: {commission_impact_pct:.1f}%")
     
     if final_bets > 0:
         print(f"\nTOP 5 RECOMMENDED BETS (by EV%):")
