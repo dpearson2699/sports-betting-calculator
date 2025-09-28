@@ -62,10 +62,10 @@ venv.bak/
 
 # IDE and editor files
 .idea/
+.vscode/
 *.swp
 *.swo
 *~
-# Keep .vscode/settings.json for Python path resolution
 
 # OS generated files
 .DS_Store
