@@ -27,8 +27,8 @@ MIN_BANKROLL_FOR_PARTIAL = 0.01  # 1% minimum for partial bets
 
 # Commission configuration (replaces hardcoded COMMISSION_PER_CONTRACT)
 DEFAULT_COMMISSION_RATE = 0.02  # Robinhood default
-CURRENT_COMMISSION_RATE = 0.1  # Will be set by CommissionManager
-CURRENT_PLATFORM = "PredictIt"  # Current platform name
+CURRENT_COMMISSION_RATE = None  # Will be set by CommissionManager
+CURRENT_PLATFORM = "Robinhood"  # Current platform name
 
 # Platform presets
 PLATFORM_COMMISSION_RATES = {
