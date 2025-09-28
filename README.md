@@ -1,6 +1,6 @@
 # Sports Betting Calculator: Find Mispriced Event Contracts Using Kelly Criterion
 
-[![Python 3.13+](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/downloads/)
+[![Python](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/dpearson2699/sports-betting-calculator/master/python-badge.json)](https://www.python.org/downloads/)
 [![Coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/dpearson2699/sports-betting-calculator/master/coverage-badge.json)](#-testing--development)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 

@@ -1,6 +1,6 @@
 # Examples Directory
 
-This directory contains practical examples demonstrating how to use the Wharton Betting Framework.
+This directory contains practical examples demonstrating how to use the Sports Betting Calculator.
 
 ## Available Examples
 
@@ -36,7 +36,7 @@ python examples/excel_batch_example.py
 
 ### Core Concepts
 
-- **Expected Value Calculation**: How the framework calculates betting edges
+- **Expected Value Calculation**: How the calculator determines betting edges
 - **Kelly Criterion**: Optimal bet sizing methodology
 - **Wharton Safety Constraints**: Academic-backed risk management
 - **Whole Contract Logic**: Robinhood-specific adjustments

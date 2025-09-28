@@ -14,22 +14,22 @@ Thank you for your interest in contributing to the Sports Betting Calculator! Th
 
 1. Fork and clone the repository:
 
-```bash
-git clone https://github.com/<your-username>/sports-betting-calculator.git
-cd sports-betting-calculator
-```
+   ```bash
+   git clone https://github.com/your-username/sports-betting-calculator.git
+   cd sports-betting-calculator
+   ```
 
 2. Install dependencies (installs the base package plus the dev/test extras):
 
-```bash
-uv sync --extra all
-```
+   ```bash
+   uv sync --extra all
+   ```
 
 3. Run the full test suite to ensure everything works locally:
 
-```bash
-uv run pytest
-```
+   ```bash
+   uv run pytest
+   ```
 
 ## Development Workflow
 
@@ -37,12 +37,12 @@ uv run pytest
 
 ```bash
 # Run all tests with coverage
-uv run pytest --cov=src --cov-report=term-missing
+uv run pytest
 
 # Run specific test types
-uv run pytest tests/unit/         # Unit tests only
-uv run pytest tests/integration/  # Integration tests only
-uv run pytest -m "not slow"       # Fast feedback suite
+uv run pytest tests/unit/          # Unit tests only
+uv run pytest tests/integration/   # Integration tests only
+uv run pytest -m "not slow"        # Fast tests only
 
 # Generate HTML coverage report
 uv run pytest --cov=src --cov-report=html:test-results/coverage
@@ -54,6 +54,22 @@ uv run pytest --cov=src --cov-report=html:test-results/coverage
 - Use descriptive variable names
 - Add docstrings to all public functions
 - Keep functions focused and single-purpose
+
+Use these commands to maintain code quality:
+
+```bash
+# Format code with Black
+uv run black .
+
+# Check style with flake8
+uv run flake8
+
+# Security check with bandit
+uv run bandit -r src/
+
+# Check dependencies for vulnerabilities
+uv run safety check
+```
 
 ### Testing Requirements
 
