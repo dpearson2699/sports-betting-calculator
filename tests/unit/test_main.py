@@ -30,7 +30,8 @@ class TestInteractiveSingleBet:
             'contracts_to_buy': 32,
             'expected_profit': 18.67,
             'target_bet_amount': 15.50,
-            'unused_amount': 0.50
+            'unused_amount': 0.50,
+            'ev_percentage': 12.5
         }
         
         # Execute
@@ -48,7 +49,7 @@ class TestInteractiveSingleBet:
         print_calls = [call[0][0] for call in mock_print.call_args_list]
         output_text = ' '.join(print_calls)
         
-        assert 'Decision: BET' in output_text
+        assert 'DECISION: BET' in output_text
         assert 'Bet Amount: $15.00' in output_text
         assert 'Bet Percentage: 15.0% of bankroll' in output_text
         assert 'Contracts to Buy: 32' in output_text
@@ -77,7 +78,7 @@ class TestInteractiveSingleBet:
         print_calls = [call[0][0] for call in mock_print.call_args_list]
         output_text = ' '.join(print_calls)
         
-        assert 'Decision: NO BET' in output_text
+        assert 'DECISION: NO BET' in output_text
         assert 'Reason: EV below 10% threshold (8.0%)' in output_text
 
     @patch('builtins.input')
@@ -93,7 +94,8 @@ class TestInteractiveSingleBet:
             'bet_amount': 12.00,
             'bet_percentage': 12.0,
             'contracts_to_buy': 28,
-            'expected_profit': 15.00
+            'expected_profit': 15.00,
+            'ev_percentage': 11.2
         }
         
         # Execute
@@ -136,7 +138,8 @@ class TestInteractiveSingleBet:
             'contracts_to_buy': 31,
             'expected_profit': 17.25,
             'target_bet_amount': 15.00,
-            'unused_amount': 0.50
+            'unused_amount': 0.50,
+            'ev_percentage': 13.8
         }
         
         interactive_single_bet()
@@ -315,7 +318,7 @@ class TestMainFunction:
     @patch('src.main.excel_batch_mode')
     def test_excel_batch_option(self, mock_excel_mode, mock_print, mock_input):
         """Test selecting Excel batch mode"""
-        mock_input.side_effect = ['1', '3']  # Select option 1, then exit
+        mock_input.side_effect = ['1', '4']  # Select option 1, then exit
         
         main()
         
@@ -326,7 +329,7 @@ class TestMainFunction:
     @patch('src.main.interactive_single_bet')
     def test_single_bet_option(self, mock_single_bet, mock_print, mock_input):
         """Test selecting single bet mode"""
-        mock_input.side_effect = ['2', '3']  # Select option 2, then exit
+        mock_input.side_effect = ['2', '4']  # Select option 2, then exit
         
         main()
         
@@ -336,7 +339,7 @@ class TestMainFunction:
     @patch('builtins.print')
     def test_exit_option(self, mock_print, mock_input):
         """Test exit option"""
-        mock_input.return_value = '3'  # Exit immediately
+        mock_input.return_value = '4'  # Exit immediately
         
         main()
         
@@ -350,7 +353,7 @@ class TestMainFunction:
     @patch('builtins.print')
     def test_invalid_menu_option(self, mock_print, mock_input):
         """Test invalid menu option handling"""
-        mock_input.side_effect = ['5', '3']  # Invalid option, then exit
+        mock_input.side_effect = ['5', '4']  # Invalid option, then exit
         
         main()
         
@@ -365,7 +368,7 @@ class TestMainFunction:
     @patch('src.main.interactive_single_bet')
     def test_menu_loop_continues_after_operation(self, mock_single_bet, mock_print, mock_input):
         """Test that menu continues after completing an operation"""
-        mock_input.side_effect = ['2', '3']  # Single bet, then exit
+        mock_input.side_effect = ['2', '4']  # Single bet, then exit
         
         main()
         
@@ -381,7 +384,7 @@ class TestMainFunction:
     @patch('builtins.print')
     def test_menu_display_format(self, mock_print, mock_input):
         """Test that menu displays correctly formatted options"""
-        mock_input.return_value = '3'  # Exit immediately
+        mock_input.return_value = '4'  # Exit immediately
         
         main()
         
@@ -392,7 +395,8 @@ class TestMainFunction:
         assert 'WHARTON BETTING FRAMEWORK' in output_text.upper()
         assert '1' in output_text and 'Excel Batch Processing' in output_text
         assert '2' in output_text and 'Single Bet Analysis' in output_text
-        assert '3' in output_text and 'Exit' in output_text
+        assert '3' in output_text and 'Commission Configuration' in output_text
+        assert '4' in output_text and 'Exit' in output_text
 
 
 class TestMainIntegrationScenarios:
@@ -410,7 +414,7 @@ class TestMainIntegrationScenarios:
             '68',         # Win percentage  
             '0.45',       # Contract price
             '5.5',        # Margin
-            '3'           # Exit after completing bet
+            '4'           # Exit after completing bet
         ]
         
         mock_framework.return_value = {
@@ -418,7 +422,8 @@ class TestMainIntegrationScenarios:
             'bet_amount': 15.00,
             'bet_percentage': 15.0,
             'contracts_to_buy': 32,
-            'expected_profit': 18.67
+            'expected_profit': 18.67,
+            'ev_percentage': 12.5
         }
         
         main()

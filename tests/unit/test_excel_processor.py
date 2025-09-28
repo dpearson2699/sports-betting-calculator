@@ -383,7 +383,8 @@ class TestDisplaySummary:
             'Game': ['Game 1', 'Game 2', 'Game 3'],
             'Cumulative Bet Amount': [50.0, 30.0, 0.0],
             'Expected Value EV': [7.5, 4.5, 0.0],
-            'EV Percentage': [0.15, 0.12, 0.08]
+            'EV Percentage': [0.15, 0.12, 0.08],
+            'Contracts To Buy': [100, 60, 0]
         })
         
         display_summary(df, 100.0)
