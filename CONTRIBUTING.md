@@ -19,13 +19,13 @@ Thank you for your interest in contributing to the Sports Betting Calculator! Th
    cd sports-betting-calculator
    ```
 
-2. Install dependencies:
+2. Install dependencies (installs the base package plus the dev/test extras):
 
    ```bash
    uv sync --extra all
    ```
 
-3. Run tests to ensure everything works:
+3. Run the full test suite to ensure everything works locally:
 
    ```bash
    uv run pytest
@@ -45,7 +45,7 @@ uv run pytest tests/integration/   # Integration tests only
 uv run pytest -m "not slow"        # Fast tests only
 
 # Generate HTML coverage report
-uv run pytest --cov=src --cov-report=html
+uv run pytest --cov=src --cov-report=html:test-results/coverage
 ```
 
 ### Code Style
