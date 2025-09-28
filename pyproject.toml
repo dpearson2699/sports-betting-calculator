@@ -103,6 +103,7 @@ markers = [
 filterwarnings = [
     "ignore::DeprecationWarning",
     "ignore::PendingDeprecationWarning",
+    "ignore:The NumPy module was reloaded:UserWarning",
 ]
 
 [tool.coverage.run]
