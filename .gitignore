@@ -48,6 +48,9 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 
+# Benchmark outputs
+.benchmarks/
+
 # Virtual environments
 .env
 .venv
@@ -93,3 +96,6 @@ local_settings.py
 
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints
+
+# Kiro folder
+.kiro/
