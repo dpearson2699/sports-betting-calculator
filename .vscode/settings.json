@@ -30,5 +30,6 @@
     "editor.formatOnSave": false,
     "editor.codeActionsOnSave": {
         "source.organizeImports": "explicit"
-    }
+    },
+    "kiroAgent.configureMCP": "Enabled"
 }
