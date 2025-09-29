@@ -1,4 +1,6 @@
-def normalize_contract_price(contract_price):
+from typing import Optional, Dict, Any, Union
+
+def normalize_contract_price(contract_price: Union[int, float]) -> float:
     """
     Normalize contract price to dollar format.
     
@@ -20,7 +22,11 @@ def normalize_contract_price(contract_price):
         return contract_price
 
 
-def calculate_whole_contracts(target_bet_amount, contract_price, commission_per_contract=None):
+def calculate_whole_contracts(
+    target_bet_amount: float, 
+    contract_price: Union[int, float], 
+    commission_per_contract: Optional[float] = None
+) -> Dict[str, Union[int, float]]:
     """
     Calculate whole contracts and adjust bet amount for platform constraints.
     
@@ -40,9 +46,9 @@ def calculate_whole_contracts(target_bet_amount, contract_price, commission_per_
         }
     """
     # Import here to avoid circular imports
-    try:
+    if __package__:
         from .commission_manager import commission_manager
-    except ImportError:
+    else:
         from commission_manager import commission_manager
     
     # Use CommissionManager if no commission rate provided
@@ -72,8 +78,13 @@ def calculate_whole_contracts(target_bet_amount, contract_price, commission_per_
     }
 
 
-def user_input_betting_framework(weekly_bankroll, model_win_percentage, contract_price, 
-                                model_win_margin=None, commission_per_contract=None):
+def user_input_betting_framework(
+    weekly_bankroll: float, 
+    model_win_percentage: Union[int, float], 
+    contract_price: Union[int, float], 
+    model_win_margin: Optional[Union[int, float]] = None, 
+    commission_per_contract: Optional[float] = None
+) -> Dict[str, Any]:
     """
     Wharton-optimized framework using ONLY user-provided data.
     Enforces whole contract purchases with platform-specific commission.
@@ -178,7 +189,6 @@ def user_input_betting_framework(weekly_bankroll, model_win_percentage, contract
     # If we can't buy any whole contracts, treat as no bet
     if contract_info['whole_contracts'] == 0:
         # Show commission impact on minimum bet requirement
-        min_bet_without_commission = normalized_price
         commission_increase = ((contract_info["adjusted_price"] - normalized_price) / normalized_price) * 100
         
         reason = f'Target bet amount ${target_bet_amount:.2f} insufficient for 1 whole contract at ${contract_info["adjusted_price"]:.2f}'

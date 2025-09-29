@@ -19,6 +19,9 @@ from .betting_framework import (
     user_input_betting_framework,
 )
 
+# Make examples available at package level
+from . import examples
+
 from .excel_processor import (
     process_betting_excel,
     create_sample_excel_in_input_dir,
