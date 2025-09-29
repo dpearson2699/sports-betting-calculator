@@ -1,0 +1,45 @@
+name: badges
+
+on:
+  workflow_run:
+    workflows: ["Test Suite"]
+    types:
+      - completed
+    branches: [master]
+  push:
+    branches: [master]
+
+permissions:
+  contents: write
+
+jobs:
+  update-badge:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'push' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Sync dependencies
+        run: uv sync --group test
+
+      - name: Run tests with coverage (for badge generation)
+        run: uv run pytest tests/ -v --cov=src --cov-report=xml
+
+      - name: Generate coverage badge
+        run: uv run python scripts/generate_coverage_badge.py --input coverage.xml
+
+      - name: Generate python version badge
+        run: uv run python scripts/generate_python_badge.py
+
+      - name: Commit updated badge
+        if: github.event_name == 'push' || (github.event_name == 'workflow_run' && github.ref == 'refs/heads/master')
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'chore: update badges'
+          file_pattern: |
+            .github/badges/coverage-badge.json
+            .github/badges/python-badge.json
