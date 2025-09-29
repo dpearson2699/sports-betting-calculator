@@ -8,7 +8,7 @@ for a single bet analysis.
 
 from pathlib import Path
 
-from src.betting_framework import user_input_betting_framework
+from ..betting_framework import user_input_betting_framework
 
 
 def basic_single_bet_example():

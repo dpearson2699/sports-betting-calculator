@@ -11,7 +11,7 @@ import pandas as pd
 import tempfile
 import os
 
-from src.excel_processor import process_betting_excel
+from ..excel_processor import process_betting_excel
 
 
 def create_example_excel_data():

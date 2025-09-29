@@ -15,7 +15,11 @@ Demonstrates fundamental single-bet analysis:
 **Run with:**
 
 ```bash
-python examples/basic_usage.py
+# As a script
+python -m src.examples.basic_usage
+
+# Or import and run functions
+python -c "from src.examples.basic_usage import basic_single_bet_example; basic_single_bet_example()"
 ```
 
 ### 2. Excel Batch Processing (`excel_batch_example.py`)
@@ -29,7 +33,11 @@ Shows advanced batch processing capabilities:
 **Run with:**
 
 ```bash
-python examples/excel_batch_example.py
+# As a script
+python -m src.examples.excel_batch_example
+
+# Or import and run functions
+python -c "from src.examples.excel_batch_example import excel_batch_demonstration; excel_batch_demonstration()"
 ```
 
 ## What These Examples Teach
@@ -102,10 +110,10 @@ uv sync  # Install dependencies
 
 ```bash
 # Basic usage patterns
-python examples/basic_usage.py
+python -m src.examples.basic_usage
 
 # Excel batch processing
-python examples/excel_batch_example.py
+python -m src.examples.excel_batch_example
 ```
 
 ### Expected Output
