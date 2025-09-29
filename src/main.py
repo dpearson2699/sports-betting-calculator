@@ -11,9 +11,9 @@ from .excel_processor import (
     get_input_file_path
 )
 from .commission_manager import commission_manager
-from config import INPUT_DIR, OUTPUT_DIR
+from .config.settings import INPUT_DIR, OUTPUT_DIR
 
-def interactive_single_bet():
+def interactive_single_bet() -> None:
     """Interactive mode for single bet analysis"""
     print("Single Bet Analysis")
     print("-" * 30)
@@ -96,7 +96,7 @@ def interactive_single_bet():
     except Exception as e:
         print(f"Error: {e}")
 
-def commission_configuration():
+def commission_configuration() -> None:
     """Interactive commission configuration interface"""
     print("Commission Configuration")
     print("-" * 30)
@@ -181,7 +181,7 @@ def commission_configuration():
         except Exception as e:
             print(f"Error: {e}")
 
-def excel_batch_mode():
+def excel_batch_mode() -> None:
     """Excel batch processing mode with improved file handling"""
     print("Excel Batch Processing")
     print("-" * 30)
@@ -256,7 +256,7 @@ def excel_batch_mode():
         print(f"  Platform used: {platform}")
         print(f"  Commission rate: ${commission_rate:.2f} per contract")
         
-        if commission_rate > 0 and results_df is not None and hasattr(results_df, 'columns') and hasattr(results_df.columns, '__contains__'):
+        if commission_rate > 0 and hasattr(results_df, 'columns') and hasattr(results_df.columns, '__contains__'):
             try:
                 if 'Final Recommendation' in results_df.columns and 'Contracts To Buy' in results_df.columns:
                     total_contracts = results_df[results_df['Final Recommendation'] == 'BET']['Contracts To Buy'].sum()
@@ -274,7 +274,7 @@ def excel_batch_mode():
     else:
         print("Processing failed. Please check your Excel file format.")
 
-def display_main_menu():
+def display_main_menu() -> None:
     """Display the main menu header and options"""
     print("\n" + "=" * 50)
     print("   WHARTON BETTING FRAMEWORK")
@@ -299,7 +299,7 @@ def display_main_menu():
     print("3. Commission Configuration")
     print("4. Exit")
 
-def main():
+def main() -> None:
     """Main application interface"""
     display_main_menu()
     
