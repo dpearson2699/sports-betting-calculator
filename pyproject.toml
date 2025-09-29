@@ -1,6 +1,4 @@
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+
 
 [project]
 name = "sports-betting-calculator"
@@ -35,9 +33,6 @@ classifiers = [
     "Topic :: Office/Business :: Financial",
     "Topic :: Scientific/Engineering :: Mathematics",
 ]
-
-[tool.hatch.build.targets.wheel]
-packages = ["src", "config"]
 
 [project.urls]
 "Homepage" = "https://github.com/dpearson2699/sports-betting-calculator"
