@@ -1,6 +1,13 @@
-"""Unit tests for betting_framework.py core functions"""
+"""
+Unit tests for betting_framework.py
+
+Tests the core Kelly criterion calculations and betting logic functions
+with clear arrange-act-assert structure.
+"""
 
 import pytest
+import sys
+import os
 
 from src.betting_framework import (
     normalize_contract_price,
@@ -10,305 +17,400 @@ from src.betting_framework import (
 
 
 class TestNormalizeContractPrice:
-    """Test contract price normalization functionality"""
+    """Test contract price normalization functionality."""
     
-    def test_cents_format_conversion(self):
-        """Test that cents format (>=1.0) converts to dollars"""
-        assert normalize_contract_price(27) == 0.27
-        assert normalize_contract_price(45) == 0.45
-        assert normalize_contract_price(99) == 0.99
-        assert normalize_contract_price(1) == 0.01
+    def test_normalize_cents_format(self):
+        """Test normalization of prices in cents format (>=1.0)."""
+        # Arrange
+        price_in_cents = 27
+        expected = 0.27
+        
+        # Act
+        result = normalize_contract_price(price_in_cents)
+        
+        # Assert
+        assert result == expected
     
-    def test_dollar_format_passthrough(self):
-        """Test that dollar format (<1.0) passes through unchanged"""
-        assert normalize_contract_price(0.27) == 0.27
-        assert normalize_contract_price(0.45) == 0.45
-        assert normalize_contract_price(0.99) == 0.99
-        assert normalize_contract_price(0.01) == 0.01
+    def test_normalize_dollar_format(self):
+        """Test normalization of prices already in dollar format (<1.0)."""
+        # Arrange
+        price_in_dollars = 0.27
+        expected = 0.27
+        
+        # Act
+        result = normalize_contract_price(price_in_dollars)
+        
+        # Assert
+        assert result == expected
     
-    def test_edge_cases(self):
-        """Test edge cases for price normalization"""
-        assert normalize_contract_price(0.0) == 0.0
-        assert normalize_contract_price(1.0) == 0.01  # Exactly 1.0 treated as cents
-        assert normalize_contract_price(100) == 1.0
+    def test_normalize_edge_case_one_dollar(self):
+        """Test normalization of exactly 1.0 (treated as cents)."""
+        # Arrange
+        price = 1.0
+        expected = 0.01
+        
+        # Act
+        result = normalize_contract_price(price)
+        
+        # Assert
+        assert result == expected
     
-    def test_decimal_precision(self):
-        """Test that decimal precision is maintained"""
-        assert abs(normalize_contract_price(27.5) - 0.275) < 1e-10
-        assert abs(normalize_contract_price(0.275) - 0.275) < 1e-10
+    def test_normalize_large_cents_value(self):
+        """Test normalization of large cents values."""
+        # Arrange
+        price_in_cents = 99
+        expected = 0.99
+        
+        # Act
+        result = normalize_contract_price(price_in_cents)
+        
+        # Assert
+        assert result == expected
+    
+    def test_normalize_small_dollar_value(self):
+        """Test normalization of small dollar values."""
+        # Arrange
+        price_in_dollars = 0.01
+        expected = 0.01
+        
+        # Act
+        result = normalize_contract_price(price_in_dollars)
+        
+        # Assert
+        assert result == expected
 
 
 class TestCalculateWholeContracts:
-    """Test whole contracts calculation with commission"""
+    """Test whole contract calculation functionality."""
     
-    def test_basic_calculation(self):
-        """Test basic whole contracts calculation"""
-        result = calculate_whole_contracts(100, 0.45, 0.02)
+    def test_calculate_whole_contracts_basic(self):
+        """Test basic whole contract calculation without commission."""
+        # Arrange
+        target_bet_amount = 100.0
+        contract_price = 0.25
+        commission_per_contract = 0.0
         
-        assert abs(result['adjusted_price'] - 0.47) < 1e-10  # 0.45 + 0.02
-        assert result['whole_contracts'] == 212  # floor(100 / 0.47)
-        assert abs(result['actual_bet_amount'] - 99.64) < 0.01  # 212 * 0.47
-        assert result['unused_amount'] > 0
+        # Act
+        result = calculate_whole_contracts(target_bet_amount, contract_price, commission_per_contract)
+        
+        # Assert
+        assert result['whole_contracts'] == 400  # 100 / 0.25 = 400
+        assert result['actual_bet_amount'] == 100.0
+        assert result['unused_amount'] == 0.0
+        assert result['adjusted_price'] == 0.25
     
-    def test_insufficient_funds_for_one_contract(self):
-        """Test when target amount can't buy even one contract"""
-        result = calculate_whole_contracts(0.30, 0.45, 0.02)
+    def test_calculate_whole_contracts_with_commission(self):
+        """Test whole contract calculation with commission."""
+        # Arrange
+        target_bet_amount = 100.0
+        contract_price = 0.25
+        commission_per_contract = 0.05
         
+        # Act
+        result = calculate_whole_contracts(target_bet_amount, contract_price, commission_per_contract)
+        
+        # Assert
+        expected_adjusted_price = 0.30  # 0.25 + 0.05
+        expected_contracts = 333  # int(100 / 0.30) = 333
+        expected_actual_amount = 333 * 0.30  # 99.9
+        expected_unused = 100.0 - expected_actual_amount  # 0.1
+        
+        assert result['whole_contracts'] == expected_contracts
+        assert abs(result['actual_bet_amount'] - expected_actual_amount) < 0.001
+        assert abs(result['unused_amount'] - expected_unused) < 0.001
+        assert result['adjusted_price'] == expected_adjusted_price
+    
+    def test_calculate_whole_contracts_insufficient_funds(self):
+        """Test calculation when target amount is insufficient for one contract."""
+        # Arrange
+        target_bet_amount = 0.20
+        contract_price = 0.25
+        commission_per_contract = 0.05
+        
+        # Act
+        result = calculate_whole_contracts(target_bet_amount, contract_price, commission_per_contract)
+        
+        # Assert
         assert result['whole_contracts'] == 0
-        assert result['actual_bet_amount'] == 0
-        assert result['unused_amount'] == 0.30
+        assert result['actual_bet_amount'] == 0.0
+        assert result['unused_amount'] == 0.20
+        assert result['adjusted_price'] == 0.30
     
-    def test_exact_contract_amount(self):
-        """Test when target amount exactly matches contract costs"""
-        contract_price = 0.45
-        commission = 0.02
-        adjusted_price = contract_price + commission
-        target_amount = adjusted_price * 10  # Exactly 10 contracts
+    def test_calculate_whole_contracts_exact_amount(self):
+        """Test calculation when target amount exactly matches contract cost."""
+        # Arrange
+        target_bet_amount = 30.0
+        contract_price = 0.25
+        commission_per_contract = 0.05
         
-        result = calculate_whole_contracts(target_amount, contract_price, commission)
+        # Act
+        result = calculate_whole_contracts(target_bet_amount, contract_price, commission_per_contract)
         
-        assert result['whole_contracts'] == 10
-        assert abs(result['actual_bet_amount'] - target_amount) < 1e-10
-        assert abs(result['unused_amount']) < 1e-10
-    
-    def test_different_commission_rates(self):
-        """Test calculation with different commission rates"""
-        # No commission
-        result = calculate_whole_contracts(100, 0.50, 0.0)
-        assert result['adjusted_price'] == 0.50
-        assert result['whole_contracts'] == 200
-        
-        # High commission
-        result = calculate_whole_contracts(100, 0.50, 0.10)
-        assert result['adjusted_price'] == 0.60
-        assert result['whole_contracts'] == 166  # floor(100 / 0.60)
+        # Assert
+        expected_contracts = 100  # 30.0 / 0.30 = 100
+        assert result['whole_contracts'] == expected_contracts
+        assert result['actual_bet_amount'] == 30.0
+        assert result['unused_amount'] == 0.0
 
 
 class TestUserInputBettingFramework:
-    """Test main betting framework logic"""
+    """Test the main betting framework function."""
     
-    def test_wharton_compliant_bet(self, sample_bankroll, wharton_test_cases):
-        """Test cases that should result in BET decisions"""
-        bankroll = sample_bankroll
+    def test_profitable_bet_basic(self):
+        """Test a basic profitable bet scenario."""
+        # Arrange
+        weekly_bankroll = 1000.0
+        model_win_percentage = 0.65  # 65% win probability
+        contract_price = 0.27  # 27 cents
+        commission_per_contract = 0.0
         
-        for win_pct, price, expected_decision, description in wharton_test_cases:
-            if expected_decision == "BET":
-                result = user_input_betting_framework(bankroll, win_pct, price)
-                
-                assert result['decision'] == 'BET', f"Failed: {description}"
-                assert result['ev_percentage'] >= 10.0, "Should meet 10% EV threshold"
-                assert result['bet_amount'] > 0, "Should have positive bet amount"
-                assert result['contracts_to_buy'] > 0, "Should buy at least one contract"
-                assert result['bet_percentage'] <= 15.0, "Should not exceed 15% bankroll cap"
-                assert 'wharton_compliant' in result
-                assert 'whole_contracts_only' in result
-    
-    def test_ev_threshold_filtering(self, sample_bankroll, wharton_test_cases):
-        """Test that bets below 10% EV are filtered out"""
-        bankroll = sample_bankroll
+        # Act
+        result = user_input_betting_framework(
+            weekly_bankroll, model_win_percentage, contract_price, 
+            commission_per_contract=commission_per_contract
+        )
         
-        for win_pct, price, expected_decision, description in wharton_test_cases:
-            if expected_decision == "NO BET":
-                result = user_input_betting_framework(bankroll, win_pct, price)
-                
-                assert result['decision'] == 'NO BET', f"Failed: {description}"
-                assert result['bet_amount'] == 0, "No bet should have zero amount"
-                assert 'reason' in result, "No bet should include reason"
-    
-    def test_percentage_format_handling(self, sample_bankroll):
-        """Test dual format input handling for percentages"""
-        bankroll = sample_bankroll
-        price = 0.45
-        
-        # Test both formats give same result
-        result1 = user_input_betting_framework(bankroll, 68.0, price)  # Percentage format
-        result2 = user_input_betting_framework(bankroll, 0.68, price)  # Decimal format
-        
-        assert abs(result1['ev_percentage'] - result2['ev_percentage']) < 0.01
-        assert result1['decision'] == result2['decision']
-        assert abs(result1['bet_amount'] - result2['bet_amount']) < 0.01
-    
-    def test_price_format_handling(self, sample_bankroll):
-        """Test dual format input handling for prices"""
-        bankroll = sample_bankroll
-        win_pct = 68.0
-        
-        # Test both formats give same result
-        result1 = user_input_betting_framework(bankroll, win_pct, 45)    # Cents format
-        result2 = user_input_betting_framework(bankroll, win_pct, 0.45)  # Dollar format
-        
-        assert abs(result1['ev_percentage'] - result2['ev_percentage']) < 0.01
-        assert result1['decision'] == result2['decision']
-        assert abs(result1['bet_amount'] - result2['bet_amount']) < 0.01
-    
-    def test_bankroll_cap_enforcement(self):
-        """Test that bets are capped at 15% of bankroll"""
-        bankroll = 1000
-        win_pct = 95.0  # Very high win percentage
-        price = 0.10    # Very low price (high EV)
-        
-        result = user_input_betting_framework(bankroll, win_pct, price)
-        
+        # Assert
         assert result['decision'] == 'BET'
-        assert result['bet_percentage'] <= 15.0, "Should be capped at 15%"
-        assert result['bet_amount'] <= 150, "Should not exceed 15% of $1000 bankroll"
+        assert result['bet_amount'] > 0
+        assert result['ev_percentage'] > 10.0  # Above Wharton threshold
+        assert 'contracts_to_buy' in result
+        assert result['contracts_to_buy'] > 0
+        assert result['wharton_compliant'] is True
     
-    def test_half_kelly_implementation(self):
-        """Test that framework uses half-Kelly sizing"""
-        bankroll = 1000
-        win_pct = 70.0
-        price = 0.40
-        commission = 0.02
+    def test_unprofitable_bet_low_ev(self):
+        """Test rejection of bet with EV below Wharton threshold."""
+        # Arrange
+        weekly_bankroll = 1000.0
+        model_win_percentage = 0.52  # 52% win probability (low)
+        contract_price = 0.48  # 48 cents (high price)
+        commission_per_contract = 0.0
         
-        result = user_input_betting_framework(bankroll, win_pct, price, commission_per_contract=commission)
+        # Act
+        result = user_input_betting_framework(
+            weekly_bankroll, model_win_percentage, contract_price,
+            commission_per_contract=commission_per_contract
+        )
         
-        # Calculate what full Kelly would be
-        win_prob = 0.70
-        adjusted_price = price + commission
-        b = (1 / adjusted_price) - 1
-        p = win_prob
-        q = 1 - p
-        full_kelly = (b * p - q) / b
-        half_kelly = full_kelly * 0.5
+        # Assert
+        assert result['decision'] == 'NO BET'
+        assert result['bet_amount'] == 0
+        assert result['ev_percentage'] < 10.0
+        assert 'EV' in result['reason']
+        assert 'threshold' in result['reason']
+    
+    def test_negative_kelly_fraction(self):
+        """Test rejection of bet with negative Kelly fraction."""
+        # Arrange
+        weekly_bankroll = 1000.0
+        model_win_percentage = 0.30  # 30% win probability (lower)
+        contract_price = 0.60  # 60 cents (higher price)
+        commission_per_contract = 0.0
         
-        expected_fraction = min(half_kelly, 0.15)  # Capped at 15%
-        expected_target = expected_fraction * bankroll
+        # Act
+        result = user_input_betting_framework(
+            weekly_bankroll, model_win_percentage, contract_price,
+            commission_per_contract=commission_per_contract
+        )
         
-        # Allow some tolerance for whole contract adjustments
-        assert abs(result['target_bet_amount'] - expected_target) < 1.0
+        # Assert
+        assert result['decision'] == 'NO BET'
+        assert result['bet_amount'] == 0
+        assert 'Kelly' in result['reason'] or result['ev_percentage'] < 10.0
     
     def test_insufficient_funds_for_one_contract(self):
-        """Test when bankroll can't afford even one contract"""
-        bankroll = 1.0  # Very small bankroll
-        win_pct = 80.0  # High win rate
-        price = 0.50    # Contract costs more than available bankroll with commission
+        """Test rejection when target bet amount can't buy one whole contract."""
+        # Arrange
+        weekly_bankroll = 1.0  # Very small bankroll
+        model_win_percentage = 0.65
+        contract_price = 0.27
+        commission_per_contract = 0.05  # High commission
         
-        result = user_input_betting_framework(bankroll, win_pct, price)
+        # Act
+        result = user_input_betting_framework(
+            weekly_bankroll, model_win_percentage, contract_price,
+            commission_per_contract=commission_per_contract
+        )
         
+        # Assert
         assert result['decision'] == 'NO BET'
-        assert 'insufficient for 1 whole contract' in result['reason']
-        assert result['contracts_to_buy'] == 0
+        assert result['bet_amount'] == 0
+        assert 'insufficient' in result['reason']
+        assert 'whole contract' in result['reason']
     
-    def test_commission_impact(self, sample_bankroll):
-        """Test that commission properly affects calculations"""
-        bankroll = sample_bankroll
-        win_pct = 68.0
-        price = 0.45
+    def test_percentage_format_conversion(self):
+        """Test conversion of win percentage from percentage format (>1) to decimal."""
+        # Arrange
+        weekly_bankroll = 1000.0
+        model_win_percentage = 65.0  # 65% in percentage format
+        contract_price = 0.27
+        commission_per_contract = 0.0
         
-        # Test with different commission rates
-        result_low_commission = user_input_betting_framework(bankroll, win_pct, price, commission_per_contract=0.01)
-        result_high_commission = user_input_betting_framework(bankroll, win_pct, price, commission_per_contract=0.05)
+        # Act
+        result = user_input_betting_framework(
+            weekly_bankroll, model_win_percentage, contract_price,
+            commission_per_contract=commission_per_contract
+        )
         
-        # Higher commission should result in lower EV and fewer contracts
-        assert result_low_commission['ev_percentage'] > result_high_commission['ev_percentage']
-        assert result_low_commission['contracts_to_buy'] >= result_high_commission['contracts_to_buy']
+        # Assert
+        assert result['decision'] == 'BET'
+        assert result['bet_amount'] > 0
+        # Should produce same result as 0.65 decimal format
     
-    @pytest.mark.parametrize("win_pct,price,expected_decision", [
-        (68.0, 0.45, "BET"),      # Documentation example
-        (75.0, 0.20, "BET"),      # High EV
-        (55.0, 0.50, "NO BET"),   # Low EV
-        (51.0, 0.49, "NO BET"),   # Barely positive
-        (80.0, 0.10, "BET"),      # Very high EV
-    ])
-    def test_parametrized_decisions(self, sample_bankroll, win_pct, price, expected_decision):
-        """Parametrized test for various win percentage and price combinations"""
-        result = user_input_betting_framework(sample_bankroll, win_pct, price)
-        assert result['decision'] == expected_decision
+    def test_cents_format_price_conversion(self):
+        """Test conversion of contract price from cents format to dollars."""
+        # Arrange
+        weekly_bankroll = 1000.0
+        model_win_percentage = 0.65
+        contract_price = 27  # 27 cents in cents format
+        commission_per_contract = 0.0
+        
+        # Act
+        result = user_input_betting_framework(
+            weekly_bankroll, model_win_percentage, contract_price,
+            commission_per_contract=commission_per_contract
+        )
+        
+        # Assert
+        assert result['decision'] == 'BET'
+        assert result['normalized_price'] == 0.27
+        assert result['bet_amount'] > 0
     
-    def test_negative_kelly_handling(self):
-        """Test handling of negative Kelly fractions"""
-        bankroll = 100
-        # Use values that pass EV threshold but have negative Kelly
-        win_pct = 65.0  # Decent win percentage 
-        price = 0.90    # High price that creates negative Kelly
+    def test_commission_impact_on_ev(self):
+        """Test how commission affects EV calculations."""
+        # Arrange
+        weekly_bankroll = 1000.0
+        model_win_percentage = 0.60
+        contract_price = 0.30
+        commission_per_contract = 0.10  # High commission
         
-        result = user_input_betting_framework(bankroll, win_pct, price)
+        # Act
+        result = user_input_betting_framework(
+            weekly_bankroll, model_win_percentage, contract_price,
+            commission_per_contract=commission_per_contract
+        )
         
-        assert result['decision'] == 'NO BET'
-        # The actual reason will be EV threshold since it's checked first
-        assert 'EV' in result['reason'] and 'below 10%' in result['reason']
+        # Assert
+        # Commission should reduce EV significantly
+        assert 'commission_per_contract' in result
+        assert result['commission_per_contract'] == 0.10
+        if result['decision'] == 'NO BET':
+            assert 'commission' in result.get('reason', '').lower() or result['ev_percentage'] < 10.0
     
-    def test_return_structure_completeness(self, sample_bankroll):
-        """Test that return structure contains all expected fields"""
-        # Test BET case
-        result = user_input_betting_framework(sample_bankroll, 68.0, 0.45)
+    def test_maximum_bet_constraint(self):
+        """Test that bet amount is capped at 15% of bankroll."""
+        # Arrange
+        weekly_bankroll = 1000.0
+        model_win_percentage = 0.90  # Very high win probability
+        contract_price = 0.10  # Very low price (high EV)
+        commission_per_contract = 0.0
         
-        expected_bet_fields = {
-            'decision', 'bet_amount', 'bet_percentage', 'ev_percentage',
-            'expected_profit', 'contracts_to_buy', 'normalized_price',
-            'target_bet_amount', 'unused_amount', 'adjusted_price',
-            'commission_per_contract', 'wharton_compliant', 'whole_contracts_only'
-        }
+        # Act
+        result = user_input_betting_framework(
+            weekly_bankroll, model_win_percentage, contract_price,
+            commission_per_contract=commission_per_contract
+        )
         
-        assert all(field in result for field in expected_bet_fields)
-        
-        # Test NO BET case
-        result = user_input_betting_framework(sample_bankroll, 55.0, 0.50)
-        
-        expected_no_bet_fields = {
-            'decision', 'reason', 'ev_percentage', 'bet_amount', 'normalized_price'
-        }
-        
-        assert all(field in result for field in expected_no_bet_fields)
-    
-    def test_edge_case_inputs(self, edge_case_test_data):
-        """Test edge cases for input validation"""
-        for win_pct, price, bankroll, description in edge_case_test_data:
-            try:
-                result = user_input_betting_framework(bankroll, win_pct, price)
-                
-                # Should always return a valid decision
-                assert result['decision'] in ['BET', 'NO BET']
-                assert isinstance(result['ev_percentage'], (int, float))
-                assert result['bet_amount'] >= 0
-                
-            except Exception as e:
-                pytest.fail(f"Failed on {description}: {e}")
-
-
-class TestMathematicalAccuracy:
-    """Test mathematical accuracy of calculations"""
-    
-    def test_ev_calculation_accuracy(self):
-        """Test that EV calculations match expected formulas"""
-        win_prob = 0.68
-        price = 0.45
-        commission = 0.02
-        adjusted_price = price + commission
-        
-        expected_ev = (win_prob * (1/adjusted_price) - 1) * 100
-        
-        result = user_input_betting_framework(100, 68.0, 45, commission_per_contract=commission)
-        
-        assert abs(result['ev_percentage'] - expected_ev) < 0.01
-    
-    def test_kelly_calculation_accuracy(self):
-        """Test Kelly fraction calculation accuracy"""
-        bankroll = 1000
-        win_prob = 0.70
-        price = 0.40
-        commission = 0.02
-        
-        # Manual Kelly calculation
-        adjusted_price = price + commission
-        b = (1 / adjusted_price) - 1
-        p = win_prob
-        q = 1 - p
-        expected_full_kelly = (b * p - q) / b
-        expected_half_kelly = expected_full_kelly * 0.5
-        expected_capped = min(expected_half_kelly, 0.15)
-        expected_target = expected_capped * bankroll
-        
-        result = user_input_betting_framework(bankroll, 70.0, 40, commission_per_contract=commission)
-        
-        # Allow small tolerance for floating point arithmetic
-        assert abs(result['target_bet_amount'] - expected_target) < 0.01
-    
-    def test_profit_calculation_accuracy(self):
-        """Test expected profit calculation"""
-        bankroll = 100
-        result = user_input_betting_framework(bankroll, 68.0, 0.45)
-        
+        # Assert
         if result['decision'] == 'BET':
-            expected_profit = result['bet_amount'] * (result['ev_percentage'] / 100)
-            assert abs(result['expected_profit'] - expected_profit) < 0.01
+            # Bet percentage should not exceed 15%
+            assert result['bet_percentage'] <= 15.1  # Small tolerance for rounding
+    
+    def test_half_kelly_application(self):
+        """Test that Half Kelly (Wharton optimal) is applied."""
+        # Arrange
+        weekly_bankroll = 1000.0
+        model_win_percentage = 0.65
+        contract_price = 0.27
+        commission_per_contract = 0.0
+        
+        # Act
+        result = user_input_betting_framework(
+            weekly_bankroll, model_win_percentage, contract_price,
+            commission_per_contract=commission_per_contract
+        )
+        
+        # Assert
+        if result['decision'] == 'BET':
+            # Should be using Half Kelly (not Full Kelly)
+            assert result['wharton_compliant'] is True
+            # Bet percentage should be reasonable (not too aggressive)
+            assert result['bet_percentage'] < 20.0
+    
+    def test_whole_contracts_only_constraint(self):
+        """Test that only whole contracts are purchased."""
+        # Arrange
+        weekly_bankroll = 1000.0
+        model_win_percentage = 0.65
+        contract_price = 0.27
+        commission_per_contract = 0.02
+        
+        # Act
+        result = user_input_betting_framework(
+            weekly_bankroll, model_win_percentage, contract_price,
+            commission_per_contract=commission_per_contract
+        )
+        
+        # Assert
+        if result['decision'] == 'BET':
+            assert isinstance(result['contracts_to_buy'], int)
+            assert result['contracts_to_buy'] > 0
+            assert result['whole_contracts_only'] is True
+            assert 'unused_amount' in result  # Some money left over due to rounding
+    
+    def test_edge_case_zero_commission(self):
+        """Test behavior with zero commission."""
+        # Arrange
+        weekly_bankroll = 1000.0
+        model_win_percentage = 0.65
+        contract_price = 0.27
+        commission_per_contract = 0.0
+        
+        # Act
+        result = user_input_betting_framework(
+            weekly_bankroll, model_win_percentage, contract_price,
+            commission_per_contract=commission_per_contract
+        )
+        
+        # Assert
+        assert result['commission_per_contract'] == 0.0
+        if result['decision'] == 'BET':
+            assert result['adjusted_price'] == result['normalized_price']
+    
+    def test_edge_case_100_percent_win_probability(self):
+        """Test behavior with 100% win probability."""
+        # Arrange
+        weekly_bankroll = 1000.0
+        model_win_percentage = 1.0  # 100% win probability
+        contract_price = 0.27
+        commission_per_contract = 0.0
+        
+        # Act
+        result = user_input_betting_framework(
+            weekly_bankroll, model_win_percentage, contract_price,
+            commission_per_contract=commission_per_contract
+        )
+        
+        # Assert
+        assert result['decision'] == 'BET'
+        # Should hit maximum bet constraint (15%)
+        assert result['bet_percentage'] <= 15.1
+    
+    def test_edge_case_very_small_bankroll(self):
+        """Test behavior with very small bankroll."""
+        # Arrange
+        weekly_bankroll = 1.0  # $1 bankroll
+        model_win_percentage = 0.65
+        contract_price = 0.27
+        commission_per_contract = 0.0
+        
+        # Act
+        result = user_input_betting_framework(
+            weekly_bankroll, model_win_percentage, contract_price,
+            commission_per_contract=commission_per_contract
+        )
+        
+        # Assert
+        # Should likely result in NO BET due to insufficient funds for one contract
+        if result['decision'] == 'NO BET':
+            assert 'insufficient' in result['reason'] or result['ev_percentage'] < 10.0

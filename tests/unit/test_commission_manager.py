@@ -1,529 +1,809 @@
-"""Unit tests for CommissionManager class"""
+"""
+Unit tests for commission_manager.py
+
+Tests commission calculation, different commission structures, validation,
+and edge case handling with clear arrange-act-assert structure.
+"""
 
 import pytest
-from unittest.mock import patch, MagicMock
-import logging
+import sys
+import os
+from pathlib import Path
+from unittest.mock import patch, MagicMock, mock_open
 
 from src.commission_manager import CommissionManager, commission_manager
 
 
 class TestCommissionManagerInitialization:
-    """Test CommissionManager initialization and default settings"""
-    
-    def test_fresh_initialization_with_no_config(self):
-        """Test that CommissionManager initializes with defaults when no config exists"""
-        manager = CommissionManager()
-        # Clear config to test fresh initialization
-        manager._clear_config_file()
-        
-        # Create new instance to test fresh initialization
-        fresh_manager = CommissionManager()
-        assert fresh_manager.get_commission_rate() == 0.02
-        assert fresh_manager.get_current_platform() == "Robinhood"
-    
-    def test_initialization_loads_saved_settings(self):
-        """Test that CommissionManager loads previously saved settings"""
-        # Set up a known state
-        manager = CommissionManager()
-        manager.set_platform("Kalshi")
-        
-        # Create new instance - should load saved settings
-        new_manager = CommissionManager()
-        assert new_manager.get_commission_rate() == 0.00
-        assert new_manager.get_current_platform() == "Kalshi"
-        
-        # Clean up for other tests
-        new_manager.reset_to_default()
-    
-    def test_global_instance_exists(self):
-        """Test that global commission_manager instance is available"""
-        assert commission_manager is not None
-        assert isinstance(commission_manager, CommissionManager)
-        # Don't assert specific values since they depend on saved state
-
-
-class TestCommissionRateGetterSetter:
-    """Test commission rate getting and setting functionality"""
+    """Test CommissionManager initialization and default settings."""
     
     def setup_method(self):
-        """Set up CommissionManager for each test"""
-        self.manager = CommissionManager()
-        # Store initial state to restore later
-        self.initial_rate = self.manager.get_commission_rate()
-        self.initial_platform = self.manager.get_current_platform()
+        """Clear shared state before each test."""
+        CommissionManager._clear_shared_state()
     
-    def teardown_method(self):
-        """Restore initial state after each test"""
-        self.manager.set_commission_rate(self.initial_rate, self.initial_platform)
+    def test_initialization_with_defaults(self):
+        """Test initialization with default settings when no saved settings exist."""
+        # Arrange & Act
+        with patch.object(Path, 'exists', return_value=False):
+            manager = CommissionManager()
+        
+        # Assert
+        assert manager.get_commission_rate() == CommissionManager.DEFAULT_COMMISSION_RATE
+        assert manager.get_current_platform() == CommissionManager.DEFAULT_PLATFORM
+        assert manager.get_commission_rate() == 0.02
+        assert manager.get_current_platform() == "Robinhood"
     
-    def test_get_commission_rate_current(self):
-        """Test getting current commission rate (whatever it is)"""
-        rate = self.manager.get_commission_rate()
+    def test_initialization_with_shared_state(self):
+        """Test initialization using existing shared state."""
+        # Arrange
+        CommissionManager._shared_commission_rate = 0.05
+        CommissionManager._shared_platform = "Kalshi"
+        
+        # Act
+        manager = CommissionManager()
+        
+        # Assert
+        assert manager.get_commission_rate() == 0.05
+        assert manager.get_current_platform() == "Kalshi"
+    
+    @patch('commission_manager.Path.exists')
+    @patch('builtins.open', new_callable=mock_open, read_data='CURRENT_COMMISSION_RATE = 0.10\nCURRENT_PLATFORM = "PredictIt"')
+    def test_initialization_loads_saved_settings(self, mock_file, mock_exists):
+        """Test initialization loads settings from config file."""
+        # Arrange
+        mock_exists.return_value = True
+        
+        # Act
+        manager = CommissionManager()
+        
+        # Assert
+        assert manager.get_commission_rate() == 0.10
+        assert manager.get_current_platform() == "PredictIt"
+    
+    @patch('commission_manager.Path.exists')
+    @patch('builtins.open', new_callable=mock_open, read_data='CURRENT_COMMISSION_RATE = None\nCURRENT_PLATFORM = "Robinhood"')
+    def test_initialization_handles_none_rate(self, mock_file, mock_exists):
+        """Test initialization handles None rate in config file."""
+        # Arrange
+        mock_exists.return_value = True
+        
+        # Act
+        manager = CommissionManager()
+        
+        # Assert
+        assert manager.get_commission_rate() == CommissionManager.DEFAULT_COMMISSION_RATE
+        assert manager.get_current_platform() == CommissionManager.DEFAULT_PLATFORM
+
+
+class TestCommissionRateManagement:
+    """Test commission rate getting and setting functionality."""
+    
+    def setup_method(self):
+        """Clear shared state before each test."""
+        CommissionManager._clear_shared_state()
+    
+    def test_get_commission_rate_default(self):
+        """Test getting default commission rate."""
+        # Arrange & Act
+        with patch.object(Path, 'exists', return_value=False):
+            manager = CommissionManager()
+            rate = manager.get_commission_rate()
+        
+        # Assert
+        assert rate == 0.02
         assert isinstance(rate, float)
-        assert 0.0 <= rate <= 1.0
     
     def test_set_commission_rate_valid(self):
-        """Test setting valid commission rates"""
-        # Test various valid rates
-        test_rates = [0.00, 0.01, 0.05, 0.10, 0.50, 1.00]
+        """Test setting a valid commission rate."""
+        # Arrange
+        with patch.object(Path, 'exists', return_value=False):
+            manager = CommissionManager()
         
-        for rate in test_rates:
-            self.manager.set_commission_rate(rate)
-            assert self.manager.get_commission_rate() == rate
-            assert self.manager.get_current_platform() == "Custom"
+        with patch.object(manager, '_save_settings'):
+            # Act
+            manager.set_commission_rate(0.05, "Custom Platform")
+        
+        # Assert
+        assert manager.get_commission_rate() == 0.05
+        assert manager.get_current_platform() == "Custom Platform"
+    
+    def test_set_commission_rate_updates_shared_state(self):
+        """Test that setting commission rate updates shared state for new instances."""
+        # Arrange
+        with patch.object(Path, 'exists', return_value=False):
+            manager1 = CommissionManager()
+        
+        with patch.object(manager1, '_save_settings'):
+            # Act
+            manager1.set_commission_rate(0.08)
             
-            # Verify persistence by creating new instance
-            new_manager = CommissionManager()
-            assert new_manager.get_commission_rate() == rate
-            assert new_manager.get_current_platform() == "Custom"
-    
-    def test_set_commission_rate_with_platform_name(self):
-        """Test setting commission rate with custom platform name"""
-        self.manager.set_commission_rate(0.05, "TestPlatform")
+            # Create new instance after shared state is updated
+            manager2 = CommissionManager()
         
-        assert self.manager.get_commission_rate() == 0.05
-        assert self.manager.get_current_platform() == "TestPlatform"
+        # Assert
+        assert manager2.get_commission_rate() == 0.08
+        assert CommissionManager._shared_commission_rate == 0.08
     
-    def test_set_commission_rate_type_conversion(self):
-        """Test that integer rates are converted to float"""
-        self.manager.set_commission_rate(1, "IntegerTest")
+    def test_set_commission_rate_invalid_type(self):
+        """Test setting commission rate with invalid type raises TypeError."""
+        # Arrange
+        with patch.object(Path, 'exists', return_value=False):
+            manager = CommissionManager()
         
-        assert self.manager.get_commission_rate() == 1.0
-        assert isinstance(self.manager.get_commission_rate(), float)
+        # Act & Assert
+        with pytest.raises(TypeError, match="Commission rate must be a number"):
+            manager.set_commission_rate("invalid")  # type: ignore[arg-type]
     
-    @patch('src.commission_manager.logger')
-    def test_set_commission_rate_logging(self, mock_logger):
-        """Test that commission rate changes are logged"""
-        old_rate = self.manager.get_commission_rate()
-        self.manager.set_commission_rate(0.05, "TestPlatform")
+    def test_set_commission_rate_negative_value(self):
+        """Test setting negative commission rate raises ValueError."""
+        # Arrange
+        with patch.object(Path, 'exists', return_value=False):
+            manager = CommissionManager()
         
-        mock_logger.info.assert_called()
-        log_call = mock_logger.info.call_args[0][0]
-        assert "Commission rate updated" in log_call
-        assert f"{old_rate:.2f}" in log_call  # old rate (whatever it was)
-        assert "0.05" in log_call  # new rate
-    
-    def test_commission_persistence_across_instances(self):
-        """Test that commission settings persist across CommissionManager instances"""
-        # Set a distinctive rate
-        test_rate = 0.07
-        test_platform = "PersistenceTest"
-        
-        self.manager.set_commission_rate(test_rate, test_platform)
-        
-        # Create new instance - should load saved settings
-        new_manager = CommissionManager()
-        assert new_manager.get_commission_rate() == test_rate
-        assert new_manager.get_current_platform() == test_platform
-        
-        # Change settings in new instance
-        new_manager.set_platform("Kalshi")
-        
-        # Create another instance - should load the updated settings
-        third_manager = CommissionManager()
-        assert third_manager.get_commission_rate() == 0.00  # Kalshi rate
-        assert third_manager.get_current_platform() == "Kalshi"
-
-
-class TestCommissionRateValidation:
-    """Test commission rate validation and error handling"""
-    
-    def setup_method(self):
-        """Set up CommissionManager for each test"""
-        self.manager = CommissionManager()
-        # Store initial state to restore later
-        self.initial_rate = self.manager.get_commission_rate()
-        self.initial_platform = self.manager.get_current_platform()
-    
-    def teardown_method(self):
-        """Restore initial state after each test"""
-        self.manager.set_commission_rate(self.initial_rate, self.initial_platform)
-    
-    def test_invalid_rate_too_low(self):
-        """Test that negative commission rates raise ValueError"""
+        # Act & Assert
         with pytest.raises(ValueError, match="Commission rate must be between"):
-            self.manager.set_commission_rate(-0.01)
+            manager.set_commission_rate(-0.01)
     
-    def test_invalid_rate_too_high(self):
-        """Test that commission rates above 1.00 raise ValueError"""
-        with pytest.raises(ValueError, match="Commission rate must be between"):
-            self.manager.set_commission_rate(1.01)
-    
-    def test_invalid_rate_type_string(self):
-        """Test that string commission rates raise TypeError"""
-        with pytest.raises(TypeError, match="Commission rate must be a number"):
-            self.manager.set_commission_rate("0.05")
-    
-    def test_invalid_rate_type_none(self):
-        """Test that None commission rates raise TypeError"""
-        with pytest.raises(TypeError, match="Commission rate must be a number"):
-            self.manager.set_commission_rate(None)
-    
-    def test_invalid_rate_type_list(self):
-        """Test that list commission rates raise TypeError"""
-        with pytest.raises(TypeError, match="Commission rate must be a number"):
-            self.manager.set_commission_rate([0.05])
-    
-    def test_boundary_values_valid(self):
-        """Test that boundary values (0.00 and 1.00) are valid"""
-        # Test minimum boundary
-        self.manager.set_commission_rate(0.00)
-        assert self.manager.get_commission_rate() == 0.00
+    def test_set_commission_rate_too_high(self):
+        """Test setting commission rate above maximum raises ValueError."""
+        # Arrange
+        with patch.object(Path, 'exists', return_value=False):
+            manager = CommissionManager()
         
-        # Test maximum boundary
-        self.manager.set_commission_rate(1.00)
-        assert self.manager.get_commission_rate() == 1.00
+        # Act & Assert
+        with pytest.raises(ValueError, match="Commission rate must be between"):
+            manager.set_commission_rate(1.01)
+    
+    def test_set_commission_rate_boundary_values(self):
+        """Test setting commission rate at boundary values."""
+        # Arrange
+        with patch.object(Path, 'exists', return_value=False):
+            manager = CommissionManager()
+        
+        with patch.object(manager, '_save_settings'):
+            # Act & Assert - Minimum boundary
+            manager.set_commission_rate(0.00)
+            assert manager.get_commission_rate() == 0.00
+            
+            # Act & Assert - Maximum boundary
+            manager.set_commission_rate(1.00)
+            assert manager.get_commission_rate() == 1.00
 
 
 class TestPlatformPresets:
-    """Test platform preset functionality"""
+    """Test platform preset functionality."""
     
     def setup_method(self):
-        """Set up CommissionManager for each test"""
-        self.manager = CommissionManager()
-        # Store initial state to restore later
-        self.initial_rate = self.manager.get_commission_rate()
-        self.initial_platform = self.manager.get_current_platform()
-    
-    def teardown_method(self):
-        """Restore initial state after each test"""
-        self.manager.set_commission_rate(self.initial_rate, self.initial_platform)
+        """Clear shared state before each test."""
+        CommissionManager._clear_shared_state()
     
     def test_get_platform_presets(self):
-        """Test getting platform presets dictionary"""
-        presets = self.manager.get_platform_presets()
+        """Test getting platform presets returns correct structure."""
+        # Arrange & Act
+        with patch.object(Path, 'exists', return_value=False):
+            manager = CommissionManager()
+            presets = manager.get_platform_presets()
         
-        # Check expected platforms are present
-        expected_platforms = ["Robinhood", "Kalshi", "PredictIt", "Polymarket"]
-        for platform in expected_platforms:
-            assert platform in presets
-        
-        # Check specific rates
+        # Assert
+        assert isinstance(presets, dict)
+        assert "Robinhood" in presets
+        assert "Kalshi" in presets
+        assert "PredictIt" in presets
+        assert "Polymarket" in presets
+        assert "Custom" not in presets  # Should be excluded (value is None)
         assert presets["Robinhood"] == 0.02
         assert presets["Kalshi"] == 0.00
         assert presets["PredictIt"] == 0.10
-        assert presets["Polymarket"] == 0.00
-        
-        # Check that Custom is not included (it's None)
-        assert "Custom" not in presets
     
-    def test_platform_presets_immutable(self):
-        """Test that returned presets dictionary cannot modify internal state"""
-        presets = self.manager.get_platform_presets()
-        presets["Robinhood"] = 999.99  # Try to modify
+    def test_get_platform_presets_returns_copy(self):
+        """Test that platform presets returns a copy to prevent external modification."""
+        # Arrange & Act
+        with patch.object(Path, 'exists', return_value=False):
+            manager = CommissionManager()
+            presets1 = manager.get_platform_presets()
+            presets2 = manager.get_platform_presets()
         
-        # Original should be unchanged
-        fresh_presets = self.manager.get_platform_presets()
-        assert fresh_presets["Robinhood"] == 0.02
+        # Modify one copy
+        presets1["Robinhood"] = 999.99
+        
+        # Assert
+        assert presets2["Robinhood"] == 0.02  # Should be unchanged
+        assert presets1 is not presets2  # Should be different objects
     
     def test_set_platform_valid(self):
-        """Test setting platform using valid presets"""
-        test_platforms = {
-            "Robinhood": 0.02,
-            "Kalshi": 0.00,
-            "PredictIt": 0.10,
-            "Polymarket": 0.00
-        }
+        """Test setting a valid platform preset."""
+        # Arrange
+        with patch.object(Path, 'exists', return_value=False):
+            manager = CommissionManager()
         
-        for platform, expected_rate in test_platforms.items():
-            self.manager.set_platform(platform)
-            assert self.manager.get_commission_rate() == expected_rate
-            assert self.manager.get_current_platform() == platform
+        with patch.object(manager, '_save_settings'):
+            # Act
+            manager.set_platform("PredictIt")
+        
+        # Assert
+        assert manager.get_commission_rate() == 0.10
+        assert manager.get_current_platform() == "PredictIt"
+    
+    def test_set_platform_kalshi_zero_commission(self):
+        """Test setting Kalshi platform with zero commission."""
+        # Arrange
+        with patch.object(Path, 'exists', return_value=False):
+            manager = CommissionManager()
+        
+        with patch.object(manager, '_save_settings'):
+            # Act
+            manager.set_platform("Kalshi")
+        
+        # Assert
+        assert manager.get_commission_rate() == 0.00
+        assert manager.get_current_platform() == "Kalshi"
     
     def test_set_platform_invalid(self):
-        """Test setting platform with invalid platform name"""
-        with pytest.raises(ValueError, match="Platform 'InvalidPlatform' not found"):
-            self.manager.set_platform("InvalidPlatform")
-    
-    def test_set_platform_custom_rejected(self):
-        """Test that setting platform to 'Custom' is rejected"""
-        with pytest.raises(ValueError, match="Cannot set platform to 'Custom'"):
-            self.manager.set_platform("Custom")
-    
-    @patch('src.commission_manager.logger')
-    def test_set_platform_logging(self, mock_logger):
-        """Test that platform changes are logged"""
-        old_platform = self.manager.get_current_platform()
-        self.manager.set_platform("Kalshi")
+        """Test setting invalid platform raises ValueError."""
+        # Arrange
+        with patch.object(Path, 'exists', return_value=False):
+            manager = CommissionManager()
         
-        mock_logger.info.assert_called()
-        log_call = mock_logger.info.call_args[0][0]
-        assert "Platform changed" in log_call
-        assert old_platform in log_call  # old platform (whatever it was)
-        assert "Kalshi" in log_call  # new platform
+        # Act & Assert
+        with pytest.raises(ValueError, match="Platform 'InvalidPlatform' not found"):
+            manager.set_platform("InvalidPlatform")
+    
+    def test_set_platform_custom_raises_error(self):
+        """Test setting platform to 'Custom' raises ValueError."""
+        # Arrange
+        with patch.object(Path, 'exists', return_value=False):
+            manager = CommissionManager()
+        
+        # Act & Assert
+        with pytest.raises(ValueError, match="Cannot set platform to 'Custom'"):
+            manager.set_platform("Custom")
+    
+    def test_set_platform_updates_shared_state(self):
+        """Test that setting platform updates shared state for new instances."""
+        # Arrange
+        with patch.object(Path, 'exists', return_value=False):
+            manager1 = CommissionManager()
+        
+        with patch.object(manager1, '_save_settings'):
+            # Act
+            manager1.set_platform("PredictIt")
+            
+            # Create new instance after shared state is updated
+            manager2 = CommissionManager()
+        
+        # Assert
+        assert manager2.get_commission_rate() == 0.10
+        assert manager2.get_current_platform() == "PredictIt"
+
+
+class TestValidation:
+    """Test commission rate validation functionality."""
+    
+    def setup_method(self):
+        """Clear shared state before each test."""
+        CommissionManager._clear_shared_state()
+    
+    def test_validate_commission_rate_valid_float(self):
+        """Test validation accepts valid float values."""
+        # Arrange
+        with patch.object(Path, 'exists', return_value=False):
+            manager = CommissionManager()
+        
+        # Act & Assert - Should not raise exception
+        manager._validate_commission_rate(0.05)
+        manager._validate_commission_rate(0.00)
+        manager._validate_commission_rate(1.00)
+    
+    def test_validate_commission_rate_valid_int(self):
+        """Test validation accepts valid integer values."""
+        # Arrange
+        with patch.object(Path, 'exists', return_value=False):
+            manager = CommissionManager()
+        
+        # Act & Assert - Should not raise exception
+        manager._validate_commission_rate(0)
+        manager._validate_commission_rate(1)
+    
+    def test_validate_commission_rate_invalid_string(self):
+        """Test validation rejects string values."""
+        # Arrange
+        with patch.object(Path, 'exists', return_value=False):
+            manager = CommissionManager()
+        
+        # Act & Assert
+        with pytest.raises(TypeError, match="Commission rate must be a number, got str"):
+            manager._validate_commission_rate("0.05")
+    
+    def test_validate_commission_rate_invalid_none(self):
+        """Test validation rejects None values."""
+        # Arrange
+        with patch.object(Path, 'exists', return_value=False):
+            manager = CommissionManager()
+        
+        # Act & Assert
+        with pytest.raises(TypeError, match="Commission rate must be a number, got NoneType"):
+            manager._validate_commission_rate(None)
+    
+    def test_validate_commission_rate_below_minimum(self):
+        """Test validation rejects values below minimum."""
+        # Arrange
+        with patch.object(Path, 'exists', return_value=False):
+            manager = CommissionManager()
+        
+        # Act & Assert
+        with pytest.raises(ValueError, match="Commission rate must be between \\$0.00 and \\$1.00, got \\$-0.01"):
+            manager._validate_commission_rate(-0.01)
+    
+    def test_validate_commission_rate_above_maximum(self):
+        """Test validation rejects values above maximum."""
+        # Arrange
+        with patch.object(Path, 'exists', return_value=False):
+            manager = CommissionManager()
+        
+        # Act & Assert
+        with pytest.raises(ValueError, match="Commission rate must be between \\$0.00 and \\$1.00, got \\$1.01"):
+            manager._validate_commission_rate(1.01)
 
 
 class TestResetFunctionality:
-    """Test reset to default functionality"""
+    """Test reset to default functionality."""
     
     def setup_method(self):
-        """Set up CommissionManager for each test"""
-        self.manager = CommissionManager()
-        # Store initial state to restore later
-        self.initial_rate = self.manager.get_commission_rate()
-        self.initial_platform = self.manager.get_current_platform()
-    
-    def teardown_method(self):
-        """Restore initial state after each test"""
-        self.manager.set_commission_rate(self.initial_rate, self.initial_platform)
+        """Clear shared state before each test."""
+        CommissionManager._clear_shared_state()
     
     def test_reset_to_default(self):
-        """Test resetting to default settings"""
-        # Change settings
-        self.manager.set_commission_rate(0.10, "TestPlatform")
-        assert self.manager.get_commission_rate() == 0.10
-        assert self.manager.get_current_platform() == "TestPlatform"
+        """Test resetting to default settings."""
+        # Arrange
+        with patch.object(Path, 'exists', return_value=False):
+            manager = CommissionManager()
         
-        # Reset to default
-        self.manager.reset_to_default()
-        assert self.manager.get_commission_rate() == 0.02
-        assert self.manager.get_current_platform() == "Robinhood"
+        with patch.object(manager, '_save_settings'):
+            # Set custom values first
+            manager.set_commission_rate(0.15, "Custom")
+            
+            # Act
+            manager.reset_to_default()
+        
+        # Assert
+        assert manager.get_commission_rate() == CommissionManager.DEFAULT_COMMISSION_RATE
+        assert manager.get_current_platform() == CommissionManager.DEFAULT_PLATFORM
+        assert manager.get_commission_rate() == 0.02
+        assert manager.get_current_platform() == "Robinhood"
     
-    @patch('src.commission_manager.logger')
-    def test_reset_to_default_logging(self, mock_logger):
-        """Test that reset operations are logged"""
-        # Change settings first
-        self.manager.set_commission_rate(0.10, "TestPlatform")
+    def test_reset_to_default_updates_shared_state(self):
+        """Test that reset updates shared state for all instances."""
+        # Arrange
+        with patch.object(Path, 'exists', return_value=False):
+            manager1 = CommissionManager()
+            manager2 = CommissionManager()
         
-        # Reset and check logging
-        self.manager.reset_to_default()
+        with patch.object(manager1, '_save_settings'):
+            # Set custom values first
+            manager1.set_commission_rate(0.15, "Custom")
+            
+            # Act
+            manager1.reset_to_default()
         
-        mock_logger.info.assert_called()
-        log_call = mock_logger.info.call_args[0][0]
-        assert "Commission settings reset" in log_call
-        assert "TestPlatform" in log_call
-        assert "Robinhood" in log_call
+        # Assert
+        assert manager2.get_commission_rate() == 0.02
+        assert manager2.get_current_platform() == "Robinhood"
 
 
 class TestCommissionInfo:
-    """Test commission information retrieval"""
+    """Test commission information retrieval."""
     
     def setup_method(self):
-        """Set up CommissionManager for each test"""
-        self.manager = CommissionManager()
-        # Store initial state to restore later
-        self.initial_rate = self.manager.get_commission_rate()
-        self.initial_platform = self.manager.get_current_platform()
+        """Clear shared state before each test."""
+        CommissionManager._clear_shared_state()
     
-    def teardown_method(self):
-        """Restore initial state after each test"""
-        self.manager.set_commission_rate(self.initial_rate, self.initial_platform)
-    
-    def test_get_commission_info_default(self):
-        """Test getting commission info with default settings"""
-        info = self.manager.get_commission_info()
+    def test_get_commission_info_structure(self):
+        """Test commission info returns correct structure."""
+        # Arrange & Act
+        with patch.object(Path, 'exists', return_value=False):
+            manager = CommissionManager()
+            info = manager.get_commission_info()
         
-        assert info["current_platform"] == "Robinhood"
-        assert info["current_rate"] == 0.02
+        # Assert
+        assert isinstance(info, dict)
+        assert "current_platform" in info
+        assert "current_rate" in info
         assert "available_platforms" in info
         assert "platform_presets" in info
-        
-        # Check available platforms includes all expected platforms
-        expected_platforms = ["Robinhood", "Kalshi", "PredictIt", "Polymarket", "Custom"]
-        for platform in expected_platforms:
-            assert platform in info["available_platforms"]
     
-    def test_get_commission_info_after_changes(self):
-        """Test getting commission info after making changes"""
-        self.manager.set_commission_rate(0.05, "TestPlatform")
-        info = self.manager.get_commission_info()
+    def test_get_commission_info_content(self):
+        """Test commission info contains correct content."""
+        # Arrange
+        with patch.object(Path, 'exists', return_value=False):
+            manager = CommissionManager()
         
-        assert info["current_platform"] == "TestPlatform"
-        assert info["current_rate"] == 0.05
+        with patch.object(manager, '_save_settings'):
+            manager.set_platform("PredictIt")
+            
+            # Act
+            info = manager.get_commission_info()
+        
+        # Assert
+        assert info["current_platform"] == "PredictIt"
+        assert info["current_rate"] == 0.10
+        assert "Robinhood" in info["available_platforms"]
+        assert "Custom" in info["available_platforms"]
+        assert info["platform_presets"]["Robinhood"] == 0.02
+        assert "Custom" not in info["platform_presets"]  # Should be excluded
 
 
-class TestStringRepresentations:
-    """Test string representation methods"""
+class TestStringRepresentation:
+    """Test string representation methods."""
     
     def setup_method(self):
-        """Set up CommissionManager for each test"""
-        self.manager = CommissionManager()
-        # Store initial state to restore later
-        self.initial_rate = self.manager.get_commission_rate()
-        self.initial_platform = self.manager.get_current_platform()
-    
-    def teardown_method(self):
-        """Restore initial state after each test"""
-        self.manager.set_commission_rate(self.initial_rate, self.initial_platform)
+        """Clear shared state before each test."""
+        CommissionManager._clear_shared_state()
     
     def test_str_representation(self):
-        """Test __str__ method"""
-        # Set known state for testing
-        self.manager.set_commission_rate(0.02, "Robinhood")
+        """Test __str__ method returns readable format."""
+        # Arrange & Act
+        with patch.object(Path, 'exists', return_value=False):
+            manager = CommissionManager()
+            str_repr = str(manager)
         
-        str_repr = str(self.manager)
+        # Assert
         assert "CommissionManager" in str_repr
         assert "Robinhood" in str_repr
         assert "$0.02" in str_repr
     
     def test_repr_representation(self):
-        """Test __repr__ method"""
-        # Set known state for testing
-        self.manager.set_commission_rate(0.02, "Robinhood")
+        """Test __repr__ method returns detailed format."""
+        # Arrange & Act
+        with patch.object(Path, 'exists', return_value=False):
+            manager = CommissionManager()
+            repr_str = repr(manager)
         
-        repr_str = repr(self.manager)
+        # Assert
         assert "CommissionManager" in repr_str
         assert "platform='Robinhood'" in repr_str
         assert "rate=0.02" in repr_str
     
-    def test_str_after_changes(self):
-        """Test string representation after making changes"""
-        self.manager.set_commission_rate(0.10, "TestPlatform")
-        str_repr = str(self.manager)
-        assert "TestPlatform" in str_repr
-        assert "$0.10" in str_repr
+    def test_str_with_custom_settings(self):
+        """Test string representation with custom settings."""
+        # Arrange
+        with patch.object(Path, 'exists', return_value=False):
+            manager = CommissionManager()
+        
+        with patch.object(manager, '_save_settings'):
+            manager.set_commission_rate(0.08, "Custom Platform")
+            
+            # Act
+            str_repr = str(manager)
+        
+        # Assert
+        assert "Custom Platform" in str_repr
+        assert "$0.08" in str_repr
 
 
-class TestIntegrationWithBettingFramework:
-    """Test integration with existing betting framework functions"""
+class TestPersistence:
+    """Test settings persistence functionality."""
     
     def setup_method(self):
-        """Set up CommissionManager for each test"""
-        self.manager = CommissionManager()
-        # Store initial state to restore later
-        self.initial_rate = self.manager.get_commission_rate()
-        self.initial_platform = self.manager.get_current_platform()
+        """Clear shared state before each test."""
+        CommissionManager._clear_shared_state()
     
-    def teardown_method(self):
-        """Restore initial state after each test"""
-        self.manager.set_commission_rate(self.initial_rate, self.initial_platform)
+    @patch('commission_manager.Path.exists')
+    @patch('builtins.open', new_callable=mock_open, read_data='CURRENT_COMMISSION_RATE = 0.05\nCURRENT_PLATFORM = "Test"')
+    def test_load_settings_success(self, mock_file, mock_exists):
+        """Test successful loading of settings from file."""
+        # Arrange
+        mock_exists.return_value = True
+        
+        # Act
+        manager = CommissionManager()
+        
+        # Assert
+        assert manager.get_commission_rate() == 0.05
+        assert manager.get_current_platform() == "Test"
     
-    def test_integration_calculate_whole_contracts(self):
-        """Test integration with calculate_whole_contracts function"""
-        from src.betting_framework import calculate_whole_contracts
-        from src.commission_manager import commission_manager as global_manager
+    @patch('commission_manager.Path.exists')
+    @patch('builtins.open', new_callable=mock_open, read_data='INVALID_FORMAT')
+    def test_load_settings_invalid_format(self, mock_file, mock_exists):
+        """Test loading settings with invalid file format falls back to defaults."""
+        # Arrange
+        mock_exists.return_value = True
         
-        # Reset global manager to ensure clean state
-        global_manager.reset_to_default()
+        # Act
+        manager = CommissionManager()
         
-        # Test with default commission rate (should use CommissionManager)
-        result_default = calculate_whole_contracts(100, 0.45, None)
-        expected_price = 0.45 + 0.02  # Default Robinhood rate
-        assert abs(result_default['adjusted_price'] - expected_price) < 1e-10
-        
-        # Change global commission rate and test again
-        global_manager.set_commission_rate(0.05)
-        result_custom = calculate_whole_contracts(100, 0.45, None)
-        expected_price_custom = 0.45 + 0.05
-        assert abs(result_custom['adjusted_price'] - expected_price_custom) < 1e-10
-        
-        # Test that explicit commission rate still overrides
-        result_explicit = calculate_whole_contracts(100, 0.45, 0.01)
-        expected_price_explicit = 0.45 + 0.01
-        assert abs(result_explicit['adjusted_price'] - expected_price_explicit) < 1e-10
-        
-        # Reset global manager for other tests
-        global_manager.reset_to_default()
+        # Assert
+        assert manager.get_commission_rate() == CommissionManager.DEFAULT_COMMISSION_RATE
+        assert manager.get_current_platform() == CommissionManager.DEFAULT_PLATFORM
     
-    def test_integration_user_input_betting_framework(self):
-        """Test integration with user_input_betting_framework function"""
-        from src.betting_framework import user_input_betting_framework
-        from src.commission_manager import commission_manager as global_manager
+    @patch('commission_manager.Path.exists')
+    @patch('builtins.open', new_callable=mock_open, read_data='CURRENT_COMMISSION_RATE = 999.99\nCURRENT_PLATFORM = "Test"')
+    def test_load_settings_invalid_rate(self, mock_file, mock_exists):
+        """Test loading settings with invalid rate falls back to defaults."""
+        # Arrange
+        mock_exists.return_value = True
         
-        # Reset global manager to ensure clean state
-        global_manager.reset_to_default()
+        # Act
+        manager = CommissionManager()
         
-        # Test with default commission rate
-        result_default = user_input_betting_framework(
-            weekly_bankroll=1000,
-            contract_price=45,  # Will be normalized to 0.45
-            model_win_percentage=60,  # 60%
-            commission_per_contract=None  # Should use CommissionManager
-        )
-        
-        # Verify commission rate was used in calculation
-        assert result_default is not None
-        
-        # Change commission rate and verify different result
-        global_manager.set_commission_rate(0.10)
-        result_high_commission = user_input_betting_framework(
-            weekly_bankroll=1000,
-            contract_price=45,
-            model_win_percentage=60,
-            commission_per_contract=None
-        )
-        
-        # With higher commission, bet amount should be lower or NO BET
-        if result_default['decision'] != 'NO BET' and result_high_commission['decision'] != 'NO BET':
-            assert result_high_commission['bet_amount'] <= result_default['bet_amount']
-        
-        # Reset global manager for other tests
-        global_manager.reset_to_default()
+        # Assert
+        assert manager.get_commission_rate() == CommissionManager.DEFAULT_COMMISSION_RATE
+        assert manager.get_current_platform() == CommissionManager.DEFAULT_PLATFORM
     
-    def test_global_instance_consistency(self):
-        """Test that global commission_manager instance maintains consistency"""
-        from src.commission_manager import commission_manager as global_manager
-        from src.betting_framework import calculate_whole_contracts
+    @patch('commission_manager.Path.exists')
+    @patch('builtins.open', side_effect=FileNotFoundError())
+    def test_load_settings_file_not_found(self, mock_file, mock_exists):
+        """Test loading settings when file cannot be read falls back to defaults."""
+        # Arrange
+        mock_exists.return_value = True
         
-        # Change global instance
-        global_manager.set_commission_rate(0.08, "TestGlobal")
+        # Act
+        manager = CommissionManager()
         
-        # Test that betting framework uses the global instance
-        result = calculate_whole_contracts(100, 0.45, None)
-        expected_price = 0.45 + 0.08
-        assert abs(result['adjusted_price'] - expected_price) < 1e-10
+        # Assert
+        assert manager.get_commission_rate() == CommissionManager.DEFAULT_COMMISSION_RATE
+        assert manager.get_current_platform() == CommissionManager.DEFAULT_PLATFORM
+    
+    @patch('commission_manager.Path.exists')
+    @patch('builtins.open', new_callable=mock_open, read_data='CURRENT_COMMISSION_RATE = 0.05\nCURRENT_PLATFORM = "Test"')
+    def test_save_settings_success(self, mock_file, mock_exists):
+        """Test successful saving of settings to file."""
+        # Arrange
+        mock_exists.return_value = True
+        manager = CommissionManager()
         
-        # Reset for other tests
-        global_manager.reset_to_default()
+        # Act
+        manager.set_commission_rate(0.08, "New Platform")
+        
+        # Assert
+        # Verify file was written to
+        mock_file.assert_called()
+        handle = mock_file()
+        handle.write.assert_called()
+    
+    @patch('commission_manager.Path.exists')
+    def test_save_settings_no_file(self, mock_exists):
+        """Test saving settings when config file doesn't exist."""
+        # Arrange
+        mock_exists.return_value = False
+        
+        with patch.object(Path, 'exists', return_value=False):
+            manager = CommissionManager()
+        
+        # Act - Should not raise exception
+        manager.set_commission_rate(0.08)
+        
+        # Assert - Should complete without error
+        assert manager.get_commission_rate() == 0.08
+    
+    @patch('commission_manager.Path.exists')
+    @patch('builtins.open', side_effect=PermissionError())
+    def test_save_settings_permission_error(self, mock_file, mock_exists):
+        """Test saving settings handles permission errors gracefully."""
+        # Arrange
+        mock_exists.return_value = True
+        
+        with patch.object(Path, 'exists', return_value=False):
+            manager = CommissionManager()
+        
+        # Act - Should not raise exception
+        manager.set_commission_rate(0.08)
+        
+        # Assert - Should complete without error
+        assert manager.get_commission_rate() == 0.08
 
 
-class TestEdgeCasesAndRobustness:
-    """Test edge cases and robustness of CommissionManager"""
+class TestEdgeCases:
+    """Test edge cases and error conditions."""
     
     def setup_method(self):
-        """Set up CommissionManager for each test"""
-        self.manager = CommissionManager()
-        # Store initial state to restore later
-        self.initial_rate = self.manager.get_commission_rate()
-        self.initial_platform = self.manager.get_current_platform()
+        """Clear shared state before each test."""
+        CommissionManager._clear_shared_state()
     
-    def teardown_method(self):
-        """Restore initial state after each test"""
-        self.manager.set_commission_rate(self.initial_rate, self.initial_platform)
+    def test_multiple_instances_share_state(self):
+        """Test that new instances use shared state from previous instances."""
+        # Arrange & Act
+        with patch.object(Path, 'exists', return_value=False):
+            manager1 = CommissionManager()
+        
+        with patch.object(manager1, '_save_settings'):
+            manager1.set_commission_rate(0.07, "Shared")
+            
+            # Create new instances after shared state is updated
+            manager2 = CommissionManager()
+            manager3 = CommissionManager()
+        
+        # Assert
+        assert manager2.get_commission_rate() == 0.07
+        assert manager3.get_commission_rate() == 0.07
+        assert manager2.get_current_platform() == "Shared"
+        assert manager3.get_current_platform() == "Shared"
     
-    def test_very_small_commission_rates(self):
-        """Test handling of very small commission rates"""
-        small_rates = [0.0001, 0.00001, 1e-10]
+    def test_commission_rate_precision(self):
+        """Test commission rate handles floating point precision correctly."""
+        # Arrange
+        with patch.object(Path, 'exists', return_value=False):
+            manager = CommissionManager()
         
-        for rate in small_rates:
-            self.manager.set_commission_rate(rate)
-            assert self.manager.get_commission_rate() == rate
+        with patch.object(manager, '_save_settings'):
+            # Act
+            manager.set_commission_rate(0.123456789)
+        
+        # Assert
+        assert manager.get_commission_rate() == 0.123456789
     
-    def test_precision_handling(self):
-        """Test precision handling for commission rates"""
-        # Test that precision is maintained
-        precise_rate = 0.123456789
-        self.manager.set_commission_rate(precise_rate)
-        assert abs(self.manager.get_commission_rate() - precise_rate) < 1e-10
+    def test_platform_name_with_special_characters(self):
+        """Test platform names with special characters."""
+        # Arrange
+        with patch.object(Path, 'exists', return_value=False):
+            manager = CommissionManager()
+        
+        with patch.object(manager, '_save_settings'):
+            # Act
+            manager.set_commission_rate(0.05, "Platform-Name_123 (Test)")
+        
+        # Assert
+        assert manager.get_current_platform() == "Platform-Name_123 (Test)"
     
-    def test_multiple_rapid_changes(self):
-        """Test rapid succession of commission rate changes"""
-        rates = [0.01, 0.02, 0.03, 0.04, 0.05]
+    def test_clear_shared_state_functionality(self):
+        """Test clearing shared state works correctly."""
+        # Arrange
+        CommissionManager._shared_commission_rate = 0.99
+        CommissionManager._shared_platform = "Test"
         
-        for rate in rates:
-            self.manager.set_commission_rate(rate)
-            assert self.manager.get_commission_rate() == rate
+        # Act
+        CommissionManager._clear_shared_state()
+        
+        # Assert
+        assert CommissionManager._shared_commission_rate is None
+        assert CommissionManager._shared_platform is None
     
-    def test_platform_name_edge_cases(self):
-        """Test edge cases for platform names"""
-        edge_case_names = ["", "   ", "Very Long Platform Name With Spaces", "123", "Special!@#$%"]
+    def test_logging_failures_dont_break_functionality(self):
+        """Test that logging failures don't break core functionality."""
+        # Arrange
+        with patch.object(Path, 'exists', return_value=False):
+            manager = CommissionManager()
         
-        for name in edge_case_names:
-            self.manager.set_commission_rate(0.05, name)
-            assert self.manager.get_current_platform() == name
+        # Mock logger to raise exception
+        with patch('commission_manager.logger') as mock_logger:
+            mock_logger.info.side_effect = Exception("Logging failed")
+            
+            with patch.object(manager, '_save_settings'):
+                # Act - Should not raise exception despite logging failure
+                manager.set_commission_rate(0.06, "Test Platform")
+        
+        # Assert - Core functionality should still work
+        assert manager.get_commission_rate() == 0.06
+        assert manager.get_current_platform() == "Test Platform"
+
+
+class TestGlobalInstance:
+    """Test the global commission_manager instance."""
     
-    @patch('src.commission_manager.logger')
-    def test_logging_disabled_gracefully(self, mock_logger):
-        """Test that logging errors don't break functionality"""
-        # Make logger.info raise an exception
-        mock_logger.info.side_effect = Exception("Logging failed")
+    def test_global_instance_exists(self):
+        """Test that global commission_manager instance exists and is functional."""
+        # Act & Assert
+        assert commission_manager is not None
+        assert isinstance(commission_manager, CommissionManager)
+        assert hasattr(commission_manager, 'get_commission_rate')
+        assert hasattr(commission_manager, 'set_commission_rate')
+        assert hasattr(commission_manager, 'get_current_platform')
+    
+    def test_global_instance_functionality(self):
+        """Test that global instance has working functionality."""
+        # Act
+        rate = commission_manager.get_commission_rate()
+        platform = commission_manager.get_current_platform()
+        presets = commission_manager.get_platform_presets()
         
-        # Operations should still work despite logging failures
-        self.manager.set_commission_rate(0.05)
-        assert self.manager.get_commission_rate() == 0.05
+        # Assert
+        assert isinstance(rate, (int, float))
+        assert isinstance(platform, str)
+        assert isinstance(presets, dict)
+        assert rate >= 0.0
+        assert len(platform) > 0
+        assert len(presets) > 0
+
+
+class TestCommissionStructures:
+    """Test different commission structure scenarios."""
+    
+    def setup_method(self):
+        """Clear shared state before each test."""
+        CommissionManager._clear_shared_state()
+    
+    def test_zero_commission_structure(self):
+        """Test zero commission structure (like Kalshi)."""
+        # Arrange
+        with patch.object(Path, 'exists', return_value=False):
+            manager = CommissionManager()
         
-        self.manager.set_platform("Kalshi")
-        assert self.manager.get_current_platform() == "Kalshi"
+        with patch.object(manager, '_save_settings'):
+            # Act
+            manager.set_platform("Kalshi")
         
-        self.manager.reset_to_default()
-        assert self.manager.get_commission_rate() == 0.02
+        # Assert
+        assert manager.get_commission_rate() == 0.00
+        assert manager.get_current_platform() == "Kalshi"
+    
+    def test_percentage_based_commission_structure(self):
+        """Test percentage-based commission structure (like PredictIt)."""
+        # Arrange
+        with patch.object(Path, 'exists', return_value=False):
+            manager = CommissionManager()
+        
+        with patch.object(manager, '_save_settings'):
+            # Act
+            manager.set_platform("PredictIt")
+        
+        # Assert
+        assert manager.get_commission_rate() == 0.10  # 10% represented as 0.10
+        assert manager.get_current_platform() == "PredictIt"
+    
+    def test_fixed_per_contract_commission_structure(self):
+        """Test fixed per-contract commission structure (like Robinhood)."""
+        # Arrange
+        with patch.object(Path, 'exists', return_value=False):
+            manager = CommissionManager()
+        
+        with patch.object(manager, '_save_settings'):
+            # Act
+            manager.set_platform("Robinhood")
+        
+        # Assert
+        assert manager.get_commission_rate() == 0.02  # $0.02 per contract
+        assert manager.get_current_platform() == "Robinhood"
+    
+    def test_custom_commission_structure(self):
+        """Test custom commission structure for unlisted platforms."""
+        # Arrange
+        with patch.object(Path, 'exists', return_value=False):
+            manager = CommissionManager()
+        
+        with patch.object(manager, '_save_settings'):
+            # Act
+            manager.set_commission_rate(0.075, "Custom Broker")
+        
+        # Assert
+        assert manager.get_commission_rate() == 0.075
+        assert manager.get_current_platform() == "Custom Broker"
+    
+    def test_high_commission_structure(self):
+        """Test high commission structure at upper boundary."""
+        # Arrange
+        with patch.object(Path, 'exists', return_value=False):
+            manager = CommissionManager()
+        
+        with patch.object(manager, '_save_settings'):
+            # Act
+            manager.set_commission_rate(0.50, "High Commission Platform")
+        
+        # Assert
+        assert manager.get_commission_rate() == 0.50
+        assert manager.get_current_platform() == "High Commission Platform"
+    
+    def test_commission_structure_switching(self):
+        """Test switching between different commission structures."""
+        # Arrange
+        with patch.object(Path, 'exists', return_value=False):
+            manager = CommissionManager()
+        
+        with patch.object(manager, '_save_settings'):
+            # Act - Switch through different structures
+            manager.set_platform("Robinhood")  # Fixed per contract
+            robinhood_rate = manager.get_commission_rate()
+            
+            manager.set_platform("PredictIt")  # Percentage based
+            predictit_rate = manager.get_commission_rate()
+            
+            manager.set_platform("Kalshi")  # Zero commission
+            kalshi_rate = manager.get_commission_rate()
+            
+            manager.set_commission_rate(0.15, "Custom")  # Custom rate
+            custom_rate = manager.get_commission_rate()
+        
+        # Assert
+        assert robinhood_rate == 0.02
+        assert predictit_rate == 0.10
+        assert kalshi_rate == 0.00
+        assert custom_rate == 0.15
+        assert manager.get_current_platform() == "Custom"

@@ -1,1 +1,1 @@
-"""Tests for Wharton Betting Framework"""
+# Testing package for the betting framework application
