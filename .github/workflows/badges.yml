@@ -6,8 +6,6 @@ on:
     types:
       - completed
     branches: [master]
-  push:
-    branches: [master]
 
 permissions:
   contents: write
@@ -15,7 +13,7 @@ permissions:
 jobs:
   update-badge:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion != 'cancelled' || github.event_name == 'push' }}
+    if: ${{ github.event.workflow_run.conclusion != 'cancelled' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -36,7 +34,7 @@ jobs:
         run: uv run python scripts/generate_python_badge.py
 
       - name: Commit updated badge
-        if: github.event_name == 'push' || (github.event_name == 'workflow_run' && github.ref == 'refs/heads/master')
+        if: github.event_name == 'workflow_run' && github.event.workflow_run.head_branch == 'master'
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: 'chore: update badges'
