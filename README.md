@@ -1,7 +1,7 @@
 # Sports Betting Calculator: Find Mispriced Event Contracts Using Kelly Criterion
 
-[![Python](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/dpearson2699/sports-betting-calculator/master/python-badge.json)](https://www.python.org/downloads/)
-[![Coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/dpearson2699/sports-betting-calculator/master/coverage-badge.json)](#-testing--development)
+[![Python](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/dpearson2699/sports-betting-calculator/master/.github/badges/python-badge.json)](https://www.python.org/downloads/)
+[![Coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/dpearson2699/sports-betting-calculator/master/.github/badges/coverage-badge.json)](#-testing--development)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A professional sports betting framework based on academic research, implementing the Kelly Criterion with safety constraints for optimal bankroll management.
@@ -104,20 +104,17 @@ sports-betting-calculator/
 │   └── main.py                   # CLI interface
 ├── test-results/                 # Test output (auto-generated)
 │   └── coverage/                 # HTML coverage reports
-├── tests/                        # Comprehensive test suite
+├── tests/                        # Streamlined test suite
 │   ├── __init__.py               # Test package initialization
-│   ├── conftest.py               # Shared fixtures & test configuration
+│   ├── conftest.py               # Minimal shared fixtures
 │   ├── integration/              # End-to-end workflow tests
-│   │   ├── __init__.py
+│   │   ├── test_excel_workflow.py
 │   │   └── test_end_to_end.py
-│   ├── property/                 # Property-based tests using Hypothesis
-│   │   └── test_property_based.py
-│   └── unit/                     # Unit tests for individual components
-│       ├── __init__.py
+│   └── unit/                     # Unit tests for core modules
 │       ├── test_betting_framework.py
+│       ├── test_commission_manager.py
 │       ├── test_excel_processor.py
-│       ├── test_main.py
-│       └── test_missing_coverage.py
+│       └── test_main.py
 ├── CONTRIBUTING.md               # Contribution guidelines
 ├── LICENSE                       # MIT license
 ├── MATHEMATICAL-FOUNDATION.md    # Academic research documentation
@@ -130,37 +127,70 @@ sports-betting-calculator/
 
 ## 🧪 Testing & Development
 
-### Running Tests
+### Streamlined Test Suite
+
+The project features a comprehensive yet maintainable test suite focused on essential functionality:
 
 ```bash
-# Install test dependencies
-uv sync --extra test
-
-# Run all tests
+# Run all tests locally (< 30 seconds)
 uv run pytest
 
-# Run only unit tests
-uv run pytest tests/unit/
+# Run with coverage report
+uv run pytest --cov=src --cov-report=term-missing --cov-report=html
 
-# Run integration tests
-uv run pytest tests/integration/
+# Run specific test categories
+uv run pytest tests/unit/          # Unit tests only
+uv run pytest tests/integration/   # Integration tests only
 
-# Run property-based tests
-uv run pytest tests/property/
-
-# Generate coverage report
-uv run pytest --cov=src --cov-report=html
+# Run tests in parallel (CI/CD)
+uv run pytest -n auto
 ```
 
-### Test Coverage
+### Test Architecture
 
-- **102 comprehensive tests** covering all major functionality
-- **97% coverage** on core betting framework logic
-- **99% coverage** on Excel processing and allocation
-- **95% overall coverage** across the entire codebase
-- **Property-based testing** using Hypothesis for mathematical validation
-- README coverage badge updates automatically after every push to `master` via `.github/workflows/coverage-badge.yml`, which regenerates `coverage-badge.json` from the latest pytest run.
-- Tests include: mathematical accuracy, Wharton compliance, edge cases, error handling, performance benchmarks
+- **Simple Structure**: Clean unit and integration test organization
+- **Fast Execution**: Complete test suite runs in under 30 seconds locally
+- **Essential Coverage**: 87% coverage focusing on core business logic
+- **Standard Tools**: Uses pytest without complex custom frameworks
+- **UV Integration**: Consistent dependency management with `uv run` commands
+- **Offline Testing**: Works completely offline after initial setup
+
+### Test Coverage & Performance
+
+- **176 comprehensive tests** covering all major functionality
+  - **146 unit tests** across 4 core modules
+  - **30 integration tests** for end-to-end workflows
+- **87% overall coverage** exceeding the 80% target
+- **Local-First Development**: Immediate feedback with `uv run pytest`
+- **CI/CD Integration**: Automated testing on GitHub Actions (< 2 minutes)
+- **Multi-Platform**: Validated on Ubuntu, Windows, and macOS
+
+### Testing Commands
+
+| Command | Purpose | Execution Time |
+|---------|---------|----------------|
+| `uv run pytest` | Run all tests locally | < 30 seconds |
+| `uv run pytest tests/unit/` | Unit tests only | < 10 seconds |
+| `uv run pytest tests/integration/` | Integration tests only | < 20 seconds |
+| `uv run pytest --cov=src` | Tests with coverage | < 35 seconds |
+
+### Test Organization
+
+```text
+tests/
+├── unit/                         # Fast unit tests for core modules
+│   ├── test_betting_framework.py # Kelly criterion calculations (22 tests)
+│   ├── test_commission_manager.py # Commission logic (51 tests)
+│   ├── test_excel_processor.py   # Excel processing (30 tests)
+│   └── test_main.py              # User interface (43 tests)
+├── integration/                  # End-to-end workflow tests
+│   ├── test_excel_workflow.py    # Excel processing pipeline (15 tests)
+│   └── test_end_to_end.py        # Complete application flows (15 tests)
+├── conftest.py                   # Minimal shared fixtures
+└── __init__.py                   # Test package initialization
+```
+
+Tests focus on: mathematical accuracy, input validation, Excel processing workflows, user interface functionality, and error handling.
 
 ## 🔧 How It Works
 
@@ -175,7 +205,7 @@ uv run pytest --cov=src --cov-report=html
 7. **Commission Handling**: Include $0.02 per contract commission
 8. **Allocation**: Rank by EV%, allocate bankroll to best opportunities first
 
-> 📚 **For detailed mathematical formulas and theoretical foundation**, see the comprehensive **[Mathematical Foundation Documentation](MATHEMATICAL-FOUNDATION.md)**.
+> 📚 **For detailed mathematical formulas and theoretical foundation**, see the comprehensive **[Mathematical Foundation Documentation](docs/MATHEMATICAL-FOUNDATION.md)**.
 
 ## 📈 Output Files
 
@@ -256,7 +286,7 @@ Edit `config/settings.py` to modify:
 
 ## 🎓 Academic Foundation
 
-This framework is built on rigorous academic research and proven mathematical principles. For complete details on the theoretical foundation, empirical validation, and mathematical derivations, see **[Mathematical Foundation Documentation](MATHEMATICAL-FOUNDATION.md)**.
+This framework is built on rigorous academic research and proven mathematical principles. For complete details on the theoretical foundation, empirical validation, and mathematical derivations, see **[Mathematical Foundation Documentation](docs/MATHEMATICAL-FOUNDATION.md)**.
 
 The methodology is primarily based on:
 
@@ -295,12 +325,11 @@ The methodology is primarily based on:
 
 ### Getting Help
 
-1. **Check the examples**: `python examples/basic_usage.py`
-2. **Run tests**: `uv run pytest` to verify installation
-3. **Review documentation**: See `.github/copilot-instructions.md` for detailed technical info
-4. **Create an issue**: Use GitHub issues for bug reports or questions
-
-### Performance Tips
+1. **Check the examples**: `python -m src.examples.basic_usage`
+2. **Run tests**: `uv run pytest` to verify installation  
+3. **Review documentation**: See `docs/` directory for comprehensive documentation
+4. **Read the guides**: Check `docs/CONTRIBUTING.md` for development info
+5. **Create an issue**: Use GitHub issues for bug reports or questions### Performance Tips
 
 - **Large datasets**: Framework handles 100+ games efficiently
 - **Memory usage**: Results are optimized for reasonable memory footprint
