@@ -1,9 +1,7 @@
 """Commission management system for platform-agnostic betting framework."""
 
-from typing import Dict, Optional
+from typing import Dict, Any, Union
 import logging
-import json
-import os
 from pathlib import Path
 
 # Set up logging
@@ -19,7 +17,7 @@ class CommissionManager:
     """
     
     # Platform presets for popular trading platforms
-    PLATFORM_PRESETS = {
+    PLATFORM_PRESETS: Dict[str, Union[float, None]] = {
         "Robinhood": 0.02,      # $0.02 per contract
         "Kalshi": 0.00,         # No commission (built into spread)
         "PredictIt": 0.10,      # 10% of winnings
@@ -35,13 +33,29 @@ class CommissionManager:
     MIN_COMMISSION_RATE = 0.00
     MAX_COMMISSION_RATE = 1.00
     
-    def __init__(self):
+    # Class-level shared state for persistence across instances
+    _shared_commission_rate: Union[float, None] = None
+    _shared_platform: Union[str, None] = None
+    
+    def __init__(self) -> None:
         """Initialize CommissionManager with saved settings or defaults."""
         # Set up config file path
         self._settings_file = Path("config") / "settings.py"
         
-        # Load saved settings or use defaults
-        self._load_settings()
+        # Initialize instance attributes
+        self._current_commission_rate: Union[float, None] = None
+        self._current_platform: Union[str, None] = None
+        
+        # Use shared state if available, otherwise load from settings
+        if CommissionManager._shared_commission_rate is not None:
+            self._current_commission_rate = CommissionManager._shared_commission_rate
+            self._current_platform = CommissionManager._shared_platform
+        else:
+            # Load saved settings or use defaults
+            self._load_settings()
+            # Update shared state
+            CommissionManager._shared_commission_rate = self._current_commission_rate
+            CommissionManager._shared_platform = self._current_platform
         
         try:
             logger.info(f"CommissionManager initialized with {self._current_platform} "
@@ -57,7 +71,7 @@ class CommissionManager:
         Returns:
             float: Current commission rate per contract in dollars
         """
-        return self._current_commission_rate
+        return self._current_commission_rate if self._current_commission_rate is not None else self.DEFAULT_COMMISSION_RATE
     
     def set_commission_rate(self, rate: float, platform_name: str = "Custom") -> None:
         """
@@ -78,6 +92,10 @@ class CommissionManager:
         
         self._current_commission_rate = float(rate)
         self._current_platform = platform_name
+        
+        # Update shared state for all instances
+        CommissionManager._shared_commission_rate = self._current_commission_rate
+        CommissionManager._shared_platform = self._current_platform
         
         # Save settings to persist across runs
         self._save_settings()
@@ -124,6 +142,10 @@ class CommissionManager:
         self._current_commission_rate = preset_rate
         self._current_platform = platform_name
         
+        # Update shared state for all instances
+        CommissionManager._shared_commission_rate = self._current_commission_rate
+        CommissionManager._shared_platform = self._current_platform
+        
         # Save settings to persist across runs
         self._save_settings()
         
@@ -141,7 +163,7 @@ class CommissionManager:
         Returns:
             str: Current platform name
         """
-        return self._current_platform
+        return self._current_platform or self.DEFAULT_PLATFORM
     
     def reset_to_default(self) -> None:
         """Reset commission rate to default Robinhood settings."""
@@ -150,6 +172,10 @@ class CommissionManager:
         
         self._current_commission_rate = self.DEFAULT_COMMISSION_RATE
         self._current_platform = self.DEFAULT_PLATFORM
+        
+        # Update shared state for all instances
+        CommissionManager._shared_commission_rate = self._current_commission_rate
+        CommissionManager._shared_platform = self._current_platform
         
         # Save settings to persist across runs
         self._save_settings()
@@ -186,7 +212,13 @@ class CommissionManager:
         except Exception:
             pass
     
-    def _validate_commission_rate(self, rate) -> None:
+    @classmethod
+    def _clear_shared_state(cls) -> None:
+        """Clear shared state (for testing purposes)."""
+        cls._shared_commission_rate = None
+        cls._shared_platform = None
+    
+    def _validate_commission_rate(self, rate: Any) -> None:
         """
         Validate commission rate input.
         
@@ -206,7 +238,7 @@ class CommissionManager:
             raise ValueError(f"Commission rate must be between ${self.MIN_COMMISSION_RATE:.2f} "
                            f"and ${self.MAX_COMMISSION_RATE:.2f}, got ${rate:.2f}")
     
-    def get_commission_info(self) -> Dict[str, any]:
+    def get_commission_info(self) -> Dict[str, Any]:
         """
         Get comprehensive information about current commission settings.
         
