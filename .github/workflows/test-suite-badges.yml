@@ -23,9 +23,12 @@ jobs:
         run: uv sync --group test
 
       - name: Run tests with coverage (enforce 80% threshold)
+        id: main-tests
+        continue-on-error: true
         run: uv run pytest tests/ -v --cov=src --cov-report=term-missing --cov-report=xml --cov-report=html
 
       - name: Upload coverage to Codecov
+        if: always()
         uses: codecov/codecov-action@v4
         with:
           file: ./coverage.xml
@@ -33,21 +36,27 @@ jobs:
           name: codecov-umbrella
           fail_ci_if_error: false
 
-      - name: Run tests for badge generation (ignore coverage threshold)
-        if: failure() || success()
-        run: uv run pytest tests/ -v --cov=src --cov-report=xml --cov-fail-under=0
-
       - name: Generate coverage badge
+        if: always()
         run: uv run python scripts/generate_coverage_badge.py --input coverage.xml
 
       - name: Generate python version badge
+        if: always()
         run: uv run python scripts/generate_python_badge.py
 
       - name: Commit updated badge
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/master'
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: 'chore: update badges'
           file_pattern: |
             .github/badges/coverage-badge.json
             .github/badges/python-badge.json
+
+      - name: Check main test results
+        if: always()
+        run: |
+          if [ "${{ steps.main-tests.outcome }}" = "failure" ]; then
+            echo "Main tests failed due to coverage below 80%"
+            exit 1
+          fi
