@@ -57,7 +57,7 @@ dev = [
     "safety>=3.0.0",
 ]
 test = [
-    "pytest>=8.0.0",
+    "pytest>=9.0.3",
     "pytest-cov>=7.1.0",
     "pytest-xdist>=3.5.0",
 ]
